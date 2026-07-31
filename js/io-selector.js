@@ -25,7 +25,7 @@ export function createIoSelector(root) {
         <span class="io-endpoint-label" id="io-input-label"></span>
       </button>
       <div class="io-arrow" id="io-arrow" aria-hidden="true">
-        <span class="io-arrow-beam"></span>
+        <span class="io-arrow-beam"><span class="io-arrow-wave"></span></span>
         <svg class="io-arrow-head" viewBox="0 0 12 24" width="12" height="22" focusable="false">
           <path d="M3 6.5 9 12 3 17.5" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/>
         </svg>
@@ -163,10 +163,10 @@ export function createIoSelector(root) {
   function updateArrow() {
     const muted = !!state.muted;
     const level = muted ? 0 : Math.max(0, Math.min(1, (state.volume | 0) / 200));
-    // Beam 2→9px; soft pulse; duration 2.2s → 0.9s
+    // Beam 2→9px; L→R wave intensity/speed scale with level
     const weight = 2 + level * 7;
     const pulse = level;
-    const duration = 2.2 - level * 1.3;
+    const duration = 1.8 - level * 1.1;
 
     arrow.style.setProperty('--io-arrow-weight', `${weight.toFixed(2)}px`);
     arrow.style.setProperty('--io-arrow-pulse', pulse.toFixed(3));

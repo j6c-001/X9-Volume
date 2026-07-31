@@ -208,7 +208,7 @@ body {
 .io-arrow {
   --io-arrow-weight: 2px;
   --io-arrow-pulse: 0;
-  --io-arrow-duration: 2.2s;
+  --io-arrow-duration: 1.8s;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -221,14 +221,34 @@ body {
 }
 
 .io-arrow-beam {
+  position: relative;
   display: block;
   width: 22px;
   height: var(--io-arrow-weight);
   border-radius: 999px;
-  background: currentColor;
-  box-shadow: 0 0 0 transparent;
-  transform-origin: center;
+  overflow: hidden;
+  background: color-mix(in srgb, currentColor 38%, transparent);
   transition: height 0.18s ease, background-color 0.18s ease, color 0.18s ease;
+}
+
+.io-arrow-wave {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: 55%;
+  border-radius: inherit;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    var(--accent-dim) 40%,
+    var(--accent) 50%,
+    var(--accent-dim) 60%,
+    transparent 100%
+  );
+  opacity: 0;
+  transform: translateX(-120%);
+  will-change: transform;
 }
 
 .io-arrow-head {
@@ -243,7 +263,12 @@ body {
 }
 
 .io-arrow.is-live .io-arrow-beam {
-  animation: io-arrow-throb var(--io-arrow-duration) ease-in-out infinite;
+  background: color-mix(in srgb, var(--accent) 42%, transparent);
+}
+
+.io-arrow.is-live .io-arrow-wave {
+  opacity: calc(0.35 + var(--io-arrow-pulse) * 0.65);
+  animation: io-arrow-wave var(--io-arrow-duration) linear infinite;
 }
 
 .io-arrow.is-muted {
@@ -251,23 +276,26 @@ body {
   opacity: 0.55;
 }
 
-@keyframes io-arrow-throb {
-  0%,
-  100% {
-    opacity: calc(0.55 + (var(--io-arrow-pulse) * 0.3));
-    box-shadow: 0 0 calc(var(--io-arrow-pulse) * 4px) transparent;
+.io-arrow.is-muted .io-arrow-wave {
+  animation: none;
+  opacity: 0;
+}
+
+@keyframes io-arrow-wave {
+  from {
+    transform: translateX(-120%);
   }
-  50% {
-    opacity: 1;
-    box-shadow: 0 0 calc(4px + var(--io-arrow-pulse) * 8px) var(--accent-dim);
+  to {
+    transform: translateX(220%);
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .io-arrow.is-live .io-arrow-beam {
+  .io-arrow.is-live .io-arrow-wave {
     animation: none;
-    opacity: 0.9;
-    box-shadow: 0 0 6px var(--accent-dim);
+    opacity: 0.7;
+    transform: translateX(40%);
+    width: 40%;
   }
 }
 
