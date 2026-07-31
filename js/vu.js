@@ -1,12 +1,14 @@
-import { setVu } from './api.js';
+import { setVu, setVuSensor } from './api.js';
 import { state, setState } from './state.js';
-import { hapticImpact } from './haptics.js';
+import { hapticImpact, hapticTick } from './haptics.js';
 
 const SHOW_KEY = 'x9-show-vu';
 const VU_CDN = 'https://am.luxsinaudio.com/x9/v2/modern/images/vu';
 const DEFAULT_COUNT = 16;
 const SETTLE_MS = 140;
 const SELECTING_HOLD_MS = 900;
+const SENSOR_DB_MIN = -20;
+const SENSOR_DB_MAX = 20;
 
 /** 1-based CDN filename: vu1.png … vu16.png */
 export function vuImageUrl(index0) {
@@ -26,6 +28,20 @@ export function saveShowVuSelector(show) {
   return next;
 }
 
+export function vuSensorToDb(units) {
+  return (units | 0) / 2;
+}
+
+export function dbToVuSensor(db) {
+  const clamped = Math.max(SENSOR_DB_MIN, Math.min(SENSOR_DB_MAX, Number(db) || 0));
+  return Math.round(clamped * 2);
+}
+
+function formatSensorDb(db) {
+  const n = Math.round(Number(db) || 0);
+  return n >= 0 ? `+${n} dB` : `${n} dB`;
+}
+
 function vuCount() {
   const n = state.vuCount | 0;
   return n > 0 ? n : DEFAULT_COUNT;
@@ -35,12 +51,18 @@ function clampVu(index) {
   return Math.max(0, Math.min(vuCount() - 1, index | 0));
 }
 
+function clampSensorDb(db) {
+  return Math.max(SENSOR_DB_MIN, Math.min(SENSOR_DB_MAX, Math.round(Number(db) || 0)));
+}
+
 export function createVuSelector(root) {
   const overlay = document.getElementById('vu-overlay');
   const sheet = document.getElementById('vu-sheet');
   const closeBtn = document.getElementById('vu-close');
   const carousel = document.getElementById('vu-carousel');
   const metaEl = document.getElementById('vu-carousel-meta');
+  const sensorInput = document.getElementById('vu-sensor');
+  const sensorValueEl = document.getElementById('vu-sensor-value');
 
   root.innerHTML = `
     <button type="button" class="vu-entry" id="vu-entry" aria-haspopup="dialog" aria-controls="vu-sheet">
@@ -63,6 +85,9 @@ export function createVuSelector(root) {
   let lastCommitted = -1;
   let pointerStartY = null;
   let sheetDragY = 0;
+  let adjustingSensor = false;
+  let lastSensorDb = null;
+  let pendingSensorUnits = null;
 
   function styleLabel(index) {
     return `VU ${clampVu(index) + 1}`;
@@ -79,6 +104,18 @@ export function createVuSelector(root) {
     selectingTimer = setTimeout(() => {
       setState({ selectingVu: false });
     }, SELECTING_HOLD_MS);
+  }
+
+  function currentSensorDb() {
+    return clampSensorDb(vuSensorToDb(state.vuSensor));
+  }
+
+  function renderSensor(db = currentSensorDb()) {
+    const value = clampSensorDb(db);
+    sensorInput.value = String(value);
+    sensorInput.setAttribute('aria-valuenow', String(value));
+    sensorValueEl.textContent = formatSensorDb(value);
+    sensorInput.disabled = !state.connected;
   }
 
   function buildSlides(force = false) {
@@ -178,6 +215,28 @@ export function createVuSelector(root) {
     }
   }
 
+  async function commitSensor(db) {
+    const value = clampSensorDb(db);
+    const units = dbToVuSensor(value);
+    if (!state.ip || !state.connected) return;
+    if (units === (state.vuSensor | 0) && units === pendingSensorUnits) {
+      renderSensor(value);
+      return;
+    }
+
+    pendingSensorUnits = units;
+    markSelecting();
+    setState({ vuSensor: units });
+    renderSensor(value);
+    hapticImpact();
+
+    try {
+      await setVuSensor(state.ip, units);
+    } catch (_) {
+      // Poller reconciles.
+    }
+  }
+
   function settleFromScroll() {
     if (!open || ignoreScroll || settling) return;
     settling = true;
@@ -221,7 +280,11 @@ export function createVuSelector(root) {
     overlay.hidden = false;
     open = true;
     lastCommitted = clampVu(state.vu);
+    pendingSensorUnits = state.vuSensor | 0;
+    lastSensorDb = currentSensorDb();
+    adjustingSensor = false;
     metaEl.textContent = metaText(state.vu);
+    renderSensor();
     hapticImpact();
 
     requestAnimationFrame(() => {
@@ -236,6 +299,7 @@ export function createVuSelector(root) {
   function closeSheet() {
     if (!open && overlay.hidden) return;
     open = false;
+    adjustingSensor = false;
     clearTimeout(scrollTimer);
     overlay.classList.remove('is-open');
     sheet.style.transform = '';
@@ -248,7 +312,6 @@ export function createVuSelector(root) {
       overlay.removeEventListener('transitionend', finish);
     };
     overlay.addEventListener('transitionend', finish);
-    // Guarantee hide if transitionend is skipped
     setTimeout(finish, 320);
     entryBtn.focus({ preventScroll: true });
   }
@@ -274,10 +337,45 @@ export function createVuSelector(root) {
     settleFromScroll();
   });
 
-  // Light pull-down dismiss from the sheet chrome (not the carousel).
+  sensorInput.addEventListener('pointerdown', () => {
+    adjustingSensor = true;
+    lastSensorDb = clampSensorDb(sensorInput.value);
+  });
+
+  sensorInput.addEventListener('input', () => {
+    adjustingSensor = true;
+    const db = clampSensorDb(sensorInput.value);
+    sensorValueEl.textContent = formatSensorDb(db);
+    sensorInput.setAttribute('aria-valuenow', String(db));
+    if (lastSensorDb !== db) {
+      lastSensorDb = db;
+      hapticTick();
+    }
+  });
+
+  function endSensorAdjust() {
+    adjustingSensor = false;
+    commitSensor(sensorInput.value);
+  }
+
+  sensorInput.addEventListener('change', endSensorAdjust);
+  sensorInput.addEventListener('pointerup', () => {
+    if (!adjustingSensor) return;
+    endSensorAdjust();
+  });
+  sensorInput.addEventListener('pointercancel', () => {
+    adjustingSensor = false;
+    renderSensor();
+  });
+
+  // Light pull-down dismiss from sheet chrome (not carousel or slider).
   sheet.addEventListener('pointerdown', (e) => {
     if (!open) return;
-    if (e.target.closest('.vu-carousel') || e.target.closest('.vu-close')) return;
+    if (
+      e.target.closest('.vu-carousel')
+      || e.target.closest('.vu-close')
+      || e.target.closest('.vu-sensor')
+    ) return;
     pointerStartY = e.clientY;
     sheetDragY = 0;
   });
@@ -313,6 +411,7 @@ export function createVuSelector(root) {
   function render() {
     buildSlides();
     renderEntry();
+    if (!adjustingSensor) renderSensor();
     if (open && !ignoreScroll && !userScrolling && !settling) {
       const i = clampVu(state.vu);
       if (nearestIndex() !== i) scrollToIndex(i, true);

@@ -55,6 +55,25 @@
       </div>
       <div class="vu-carousel" id="vu-carousel" tabindex="0" aria-label="VU meter styles"></div>
       <p class="vu-carousel-meta" id="vu-carousel-meta" aria-live="polite">VU 1 · 1 / 16</p>
+      <div class="vu-sensor" id="vu-sensor-block">
+        <div class="vu-sensor-row">
+          <label class="vu-sensor-label" for="vu-sensor">Sensitivity</label>
+          <span class="vu-sensor-value" id="vu-sensor-value">+0 dB</span>
+        </div>
+        <input
+          type="range"
+          class="vu-sensor-slider"
+          id="vu-sensor"
+          min="-20"
+          max="20"
+          step="1"
+          value="0"
+          aria-valuemin="-20"
+          aria-valuemax="20"
+          aria-valuenow="0"
+          aria-label="VU meter sensitivity"
+        >
+      </div>
     </div>
   </div>
 

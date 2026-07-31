@@ -344,6 +344,92 @@ body {
   flex-shrink: 0;
 }
 
+.vu-sensor {
+  margin-top: 16px;
+  padding-top: 14px;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  flex-shrink: 0;
+}
+
+.vu-sensor-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.vu-sensor-label {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--text);
+  letter-spacing: -0.01em;
+}
+
+.vu-sensor-value {
+  font-size: 0.875rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: var(--accent);
+  letter-spacing: -0.02em;
+}
+
+.vu-sensor-slider {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 28px;
+  margin: 0;
+  background: transparent;
+  cursor: pointer;
+  touch-action: none;
+}
+
+.vu-sensor-slider:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+
+.vu-sensor-slider:focus-visible {
+  outline: 2px solid var(--accent-dim);
+  outline-offset: 4px;
+  border-radius: 999px;
+}
+
+.vu-sensor-slider::-webkit-slider-runnable-track {
+  height: 4px;
+  border-radius: 999px;
+  background: #2a2a35;
+}
+
+.vu-sensor-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 22px;
+  height: 22px;
+  margin-top: -9px;
+  border-radius: 50%;
+  border: 2px solid var(--bg);
+  background: var(--accent);
+  box-shadow: 0 1px 6px rgba(0, 0, 0, 0.45);
+}
+
+.vu-sensor-slider::-moz-range-track {
+  height: 4px;
+  border-radius: 999px;
+  background: #2a2a35;
+  border: none;
+}
+
+.vu-sensor-slider::-moz-range-thumb {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: 2px solid var(--bg);
+  background: var(--accent);
+  box-shadow: 0 1px 6px rgba(0, 0, 0, 0.45);
+}
+
 .source-strip {
   display: flex;
   gap: 8px;

@@ -189,6 +189,7 @@ export function createConfigDialog({ onSourcesChanged, onVuVisibilityChanged } =
         muted: !!data.isDacMetuVolume,
         vu: data.vu != null ? Math.max(0, data.vu | 0) : 0,
         vuCount: data.vu_count != null ? Math.max(1, data.vu_count | 0) : 16,
+        vuSensor: data.vuSensor != null ? (data.vuSensor | 0) : 0,
         selectingVu: false,
       });
       resetPoller();

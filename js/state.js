@@ -16,6 +16,7 @@ export const state = {
   selectingVu: false,
   vu: 0,
   vuCount: 16,
+  vuSensor: 0,
   failures: 0,
   msgCount: null,
 };
@@ -58,6 +59,7 @@ export function mergeFromServer(data, force = false) {
   if (!state.selectingVu) {
     if (data.vu != null) next.vu = Math.max(0, data.vu | 0);
     if (data.vu_count != null) next.vuCount = Math.max(1, data.vu_count | 0);
+    if (data.vuSensor != null) next.vuSensor = data.vuSensor | 0;
   }
 
   setState(next);
