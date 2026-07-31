@@ -39,6 +39,14 @@ export function createSourceSelector(root) {
     const active = state.input | 0;
     const iconOnly = getSourceIconOnly();
 
+    // Nothing to choose between — keep the main screen clear.
+    if (sources.length <= 1) {
+      root.hidden = true;
+      strip.replaceChildren();
+      return;
+    }
+
+    root.hidden = false;
     strip.classList.toggle('is-icon-only', iconOnly);
     strip.replaceChildren();
     for (const source of sources) {

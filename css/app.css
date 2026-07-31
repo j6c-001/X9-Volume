@@ -131,6 +131,10 @@ body {
   flex-shrink: 0;
 }
 
+.source-root[hidden] {
+  display: none;
+}
+
 #knob-root {
   flex: 1;
   display: flex;
