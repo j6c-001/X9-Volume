@@ -32,7 +32,49 @@
     <main class="main">
       <div id="source-root" class="source-root"></div>
       <div id="knob-root"></div>
+      <div id="vu-root" class="vu-root"></div>
     </main>
+  </div>
+
+  <div class="vu-overlay" id="vu-overlay" hidden>
+    <div
+      class="vu-sheet"
+      id="vu-sheet"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="vu-sheet-title"
+    >
+      <div class="vu-sheet-handle" aria-hidden="true"></div>
+      <div class="vu-sheet-header">
+        <h2 id="vu-sheet-title">Display style</h2>
+        <button type="button" class="vu-close" id="vu-close" aria-label="Close display styles">
+          <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
+            <path d="M6.4 6.4 17.6 17.6M17.6 6.4 6.4 17.6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+        </button>
+      </div>
+      <div class="vu-carousel" id="vu-carousel" tabindex="0" aria-label="VU meter styles"></div>
+      <p class="vu-carousel-meta" id="vu-carousel-meta" aria-live="polite">VU 1 · 1 / 16</p>
+      <div class="vu-sensor" id="vu-sensor-block">
+        <div class="vu-sensor-row">
+          <label class="vu-sensor-label" for="vu-sensor">Sensitivity</label>
+          <span class="vu-sensor-value" id="vu-sensor-value">+0 dB</span>
+        </div>
+        <input
+          type="range"
+          class="vu-sensor-slider"
+          id="vu-sensor"
+          min="-20"
+          max="20"
+          step="1"
+          value="0"
+          aria-valuemin="-20"
+          aria-valuemax="20"
+          aria-valuenow="0"
+          aria-label="VU meter sensitivity"
+        >
+      </div>
+    </div>
   </div>
 
   <div class="config-overlay" id="config-overlay" hidden>
@@ -61,11 +103,16 @@
         </section>
 
         <section class="config-panel" id="config-panel-appearance" role="tabpanel" aria-labelledby="config-tab-appearance" hidden>
-          <p class="config-hint">Accent colour for the volume knob and highlights.</p>
+          <p class="config-hint">Accent colour and main-screen chrome.</p>
           <span class="config-field-label" id="config-color-label">Knob colour</span>
           <div class="config-swatches" id="config-swatches" role="group" aria-labelledby="config-color-label">
             <input type="color" id="config-color" class="config-color-custom" name="color" aria-label="Custom knob colour" value="#d2a06a">
           </div>
+          <label class="config-toggle config-toggle-spaced" for="config-show-vu">
+            <input type="checkbox" id="config-show-vu" checked>
+            <span>Show VU selector on main screen</span>
+          </label>
+          <p class="config-hint config-hint-tight">When enabled, a preview at the bottom opens a carousel of device display styles.</p>
         </section>
 
         <section class="config-panel" id="config-panel-sources" role="tabpanel" aria-labelledby="config-tab-sources" hidden>

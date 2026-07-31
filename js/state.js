@@ -13,6 +13,10 @@ export const state = {
   muted: false,
   dragging: false,
   togglingMute: false,
+  selectingVu: false,
+  vu: 0,
+  vuCount: 16,
+  vuSensor: 0,
   failures: 0,
   msgCount: null,
 };
@@ -38,7 +42,7 @@ export function mergeFromServer(data, force = false) {
     ? data.bt_title
     : (data.device || 'Luxsin-X9');
 
-  setState({
+  const next = {
     connected: true,
     failures: 0,
     device: data.device || state.device,
@@ -50,6 +54,14 @@ export function mergeFromServer(data, force = false) {
     soundStep: data.soundStep ?? state.soundStep,
     muted: !!data.isDacMetuVolume,
     msgCount: data.msgCount ?? state.msgCount,
-  });
+  };
+
+  if (!state.selectingVu) {
+    if (data.vu != null) next.vu = Math.max(0, data.vu | 0);
+    if (data.vu_count != null) next.vuCount = Math.max(1, data.vu_count | 0);
+    if (data.vuSensor != null) next.vuSensor = data.vuSensor | 0;
+  }
+
+  setState(next);
 }
 

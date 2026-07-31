@@ -131,6 +131,10 @@ body {
   flex-shrink: 0;
 }
 
+.source-root[hidden] {
+  display: none;
+}
+
 #knob-root {
   flex: 1;
   display: flex;
@@ -138,6 +142,296 @@ body {
   justify-content: center;
   min-height: 0;
   width: 100%;
+}
+
+.vu-root {
+  width: 100%;
+  max-width: min(92vw, 460px);
+  flex-shrink: 0;
+  margin-top: auto;
+}
+
+.vu-root[hidden] {
+  display: none;
+}
+
+.vu-entry {
+  display: block;
+  width: 100%;
+  padding: 6px;
+  border: 1px solid #2a2a35;
+  border-radius: 14px;
+  background: transparent;
+  color: var(--text);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: border-color 0.15s ease, background 0.15s ease, opacity 0.15s ease;
+}
+
+.vu-entry:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+
+.vu-entry:not(:disabled):active {
+  transform: scale(0.985);
+  border-color: var(--accent);
+  background: var(--accent-dim);
+}
+
+.vu-entry-frame {
+  display: block;
+  width: 100%;
+  height: 52px;
+  border-radius: 8px;
+  overflow: hidden;
+  background: #050508;
+}
+
+.vu-entry-img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  pointer-events: none;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
+.vu-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 90;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding: 0;
+  background: rgba(0, 0, 0, 0.62);
+  opacity: 0;
+  transition: opacity 0.22s ease;
+}
+
+.vu-overlay[hidden] {
+  display: none;
+}
+
+.vu-overlay.is-open {
+  opacity: 1;
+}
+
+.vu-sheet {
+  width: min(100%, 520px);
+  max-height: min(78dvh, 640px);
+  display: flex;
+  flex-direction: column;
+  background: var(--surface);
+  border: 1px solid #2a2a35;
+  border-bottom: none;
+  border-radius: 20px 20px 0 0;
+  padding:
+    8px
+    calc(16px + var(--safe-right))
+    calc(14px + var(--safe-bottom))
+    calc(16px + var(--safe-left));
+  transform: translateY(108%);
+  transition: transform 0.28s cubic-bezier(0.22, 1, 0.36, 1);
+  touch-action: pan-y;
+}
+
+.vu-overlay.is-open .vu-sheet {
+  transform: translateY(0);
+}
+
+.vu-sheet-handle {
+  width: 36px;
+  height: 4px;
+  margin: 2px auto 10px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.18);
+  flex-shrink: 0;
+}
+
+.vu-sheet-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-shrink: 0;
+  margin-bottom: 12px;
+}
+
+.vu-sheet-header h2 {
+  font-size: 1.0625rem;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+
+.vu-close {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  margin: -6px -6px -6px 0;
+  border: none;
+  border-radius: 10px;
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+  flex-shrink: 0;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.vu-close:active {
+  background: var(--bg);
+  color: var(--text);
+}
+
+.vu-carousel {
+  display: flex;
+  gap: 14px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scroll-snap-type: x mandatory;
+  scroll-padding-inline: 12%;
+  padding: 4px 12% 8px;
+  margin: 0 -4px;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  touch-action: pan-x;
+  outline: none;
+}
+
+.vu-carousel::-webkit-scrollbar {
+  display: none;
+}
+
+.vu-slide {
+  flex: 0 0 76%;
+  scroll-snap-align: center;
+  scroll-snap-stop: always;
+  border: 1px solid #2a2a35;
+  border-radius: 14px;
+  background: #050508;
+  padding: 8px;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: border-color 0.18s ease, box-shadow 0.18s ease, opacity 0.18s ease;
+  opacity: 0.72;
+}
+
+.vu-slide.is-active {
+  opacity: 1;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 1px var(--accent-dim), 0 8px 28px rgba(0, 0, 0, 0.35);
+}
+
+.vu-slide-img {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 954 / 394;
+  object-fit: contain;
+  border-radius: 8px;
+  pointer-events: none;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
+.vu-carousel-meta {
+  margin-top: 10px;
+  text-align: center;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--muted);
+  letter-spacing: 0.01em;
+  flex-shrink: 0;
+}
+
+.vu-sensor {
+  margin-top: 16px;
+  padding-top: 14px;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  flex-shrink: 0;
+}
+
+.vu-sensor-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.vu-sensor-label {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--text);
+  letter-spacing: -0.01em;
+}
+
+.vu-sensor-value {
+  font-size: 0.875rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: var(--accent);
+  letter-spacing: -0.02em;
+}
+
+.vu-sensor-slider {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 28px;
+  margin: 0;
+  background: transparent;
+  cursor: pointer;
+  touch-action: none;
+}
+
+.vu-sensor-slider:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+
+.vu-sensor-slider:focus-visible {
+  outline: 2px solid var(--accent-dim);
+  outline-offset: 4px;
+  border-radius: 999px;
+}
+
+.vu-sensor-slider::-webkit-slider-runnable-track {
+  height: 4px;
+  border-radius: 999px;
+  background: #2a2a35;
+}
+
+.vu-sensor-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 22px;
+  height: 22px;
+  margin-top: -9px;
+  border-radius: 50%;
+  border: 2px solid var(--bg);
+  background: var(--accent);
+  box-shadow: 0 1px 6px rgba(0, 0, 0, 0.45);
+}
+
+.vu-sensor-slider::-moz-range-track {
+  height: 4px;
+  border-radius: 999px;
+  background: #2a2a35;
+  border: none;
+}
+
+.vu-sensor-slider::-moz-range-thumb {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: 2px solid var(--bg);
+  background: var(--accent);
+  box-shadow: 0 1px 6px rgba(0, 0, 0, 0.45);
 }
 
 .source-strip {
@@ -553,6 +847,16 @@ body {
   font-weight: 600;
   color: var(--text);
   cursor: pointer;
+}
+
+.config-toggle-spaced {
+  margin-top: 18px;
+  margin-bottom: 6px;
+}
+
+.config-hint-tight {
+  margin-bottom: 0;
+  margin-top: 0;
 }
 
 .config-toggle input {

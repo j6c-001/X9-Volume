@@ -19,6 +19,7 @@ const ASSETS = [
   'js/theme.js',
   'js/sources.js',
   'js/source-selector.js',
+  'js/vu.js',
   'js/haptics.js',
   'js/update.js',
   'js/version.js',
