@@ -30,13 +30,11 @@ export function createIoSelector(root) {
       <button type="button" class="io-endpoint" id="io-input" aria-haspopup="listbox" aria-expanded="false">
         <span class="io-endpoint-icon" id="io-input-icon"></span>
         <span class="io-endpoint-label" id="io-input-label"></span>
-        <span class="io-endpoint-role">Input</span>
       </button>
       <div class="io-arrow" id="io-arrow" aria-hidden="true">${ARROW_SVG}</div>
       <button type="button" class="io-endpoint" id="io-output" aria-haspopup="listbox" aria-expanded="false">
         <span class="io-endpoint-icon" id="io-output-icon"></span>
         <span class="io-endpoint-label" id="io-output-label"></span>
-        <span class="io-endpoint-role">Output</span>
       </button>
     </div>
     <div class="io-picker" id="io-picker" hidden>

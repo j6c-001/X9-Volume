@@ -201,14 +201,6 @@ body {
   max-width: 100%;
 }
 
-.io-endpoint-role {
-  font-size: 0.625rem;
-  font-weight: 600;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: var(--muted);
-}
-
 .io-flow.is-icon-only .io-endpoint {
   padding: 12px 8px;
 }
