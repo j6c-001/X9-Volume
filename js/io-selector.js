@@ -14,13 +14,6 @@ import {
   resolveOutput,
 } from './outputs.js';
 
-const ARROW_SVG = `
-  <svg class="io-arrow-svg" viewBox="0 0 48 24" width="48" height="24" aria-hidden="true" focusable="false">
-    <path class="io-arrow-shaft" d="M4 12h32" fill="none" stroke="currentColor" stroke-linecap="round"/>
-    <path class="io-arrow-head" d="M30 5.5 42 12 30 18.5" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"/>
-  </svg>
-`;
-
 export function createIoSelector(root) {
   let switching = false;
   let openSide = null; // 'input' | 'output' | null
@@ -31,7 +24,12 @@ export function createIoSelector(root) {
         <span class="io-endpoint-icon" id="io-input-icon"></span>
         <span class="io-endpoint-label" id="io-input-label"></span>
       </button>
-      <div class="io-arrow" id="io-arrow" aria-hidden="true">${ARROW_SVG}</div>
+      <div class="io-arrow" id="io-arrow" aria-hidden="true">
+        <span class="io-arrow-beam"></span>
+        <svg class="io-arrow-head" viewBox="0 0 12 24" width="12" height="22" focusable="false">
+          <path d="M3 6.5 9 12 3 17.5" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
       <button type="button" class="io-endpoint" id="io-output" aria-haspopup="listbox" aria-expanded="false">
         <span class="io-endpoint-icon" id="io-output-icon"></span>
         <span class="io-endpoint-label" id="io-output-label"></span>
@@ -165,12 +163,12 @@ export function createIoSelector(root) {
   function updateArrow() {
     const muted = !!state.muted;
     const level = muted ? 0 : Math.max(0, Math.min(1, (state.volume | 0) / 200));
-    // Stroke 1.5 → 5.5; pulse amp 0 → 1; duration 1.8s → 0.55s
-    const weight = 1.5 + level * 4;
+    // Beam 2→9px; soft pulse; duration 2.2s → 0.9s
+    const weight = 2 + level * 7;
     const pulse = level;
-    const duration = 1.8 - level * 1.25;
+    const duration = 2.2 - level * 1.3;
 
-    arrow.style.setProperty('--io-arrow-weight', weight.toFixed(2));
+    arrow.style.setProperty('--io-arrow-weight', `${weight.toFixed(2)}px`);
     arrow.style.setProperty('--io-arrow-pulse', pulse.toFixed(3));
     arrow.style.setProperty('--io-arrow-duration', `${duration.toFixed(2)}s`);
     arrow.classList.toggle('is-muted', muted || level < 0.02);

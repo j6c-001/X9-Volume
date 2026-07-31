@@ -206,53 +206,68 @@ body {
 }
 
 .io-arrow {
-  --io-arrow-weight: 1.5;
+  --io-arrow-weight: 2px;
   --io-arrow-pulse: 0;
-  --io-arrow-duration: 1.8s;
+  --io-arrow-duration: 2.2s;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--accent);
-  width: 48px;
+  gap: 2px;
+  width: 40px;
+  height: 28px;
   flex-shrink: 0;
   pointer-events: none;
+  color: var(--muted);
 }
 
-.io-arrow-svg {
+.io-arrow-beam {
   display: block;
-  overflow: visible;
+  width: 22px;
+  height: var(--io-arrow-weight);
+  border-radius: 999px;
+  background: currentColor;
+  box-shadow: 0 0 0 transparent;
   transform-origin: center;
+  transition: height 0.18s ease, background-color 0.18s ease, color 0.18s ease;
 }
 
-.io-arrow-shaft,
 .io-arrow-head {
-  stroke-width: var(--io-arrow-weight);
+  display: block;
+  flex-shrink: 0;
+  margin-left: -4px;
+  overflow: visible;
 }
 
-.io-arrow.is-live .io-arrow-svg {
+.io-arrow.is-live {
+  color: var(--accent);
+}
+
+.io-arrow.is-live .io-arrow-beam {
   animation: io-arrow-throb var(--io-arrow-duration) ease-in-out infinite;
 }
 
 .io-arrow.is-muted {
-  opacity: 0.45;
   color: var(--muted);
+  opacity: 0.55;
 }
 
 @keyframes io-arrow-throb {
   0%,
   100% {
-    transform: scale(1);
-    opacity: calc(0.55 + (var(--io-arrow-pulse) * 0.35));
+    opacity: calc(0.55 + (var(--io-arrow-pulse) * 0.3));
+    box-shadow: 0 0 calc(var(--io-arrow-pulse) * 4px) transparent;
   }
   50% {
-    transform: scale(calc(1 + (var(--io-arrow-pulse) * 0.14)));
     opacity: 1;
+    box-shadow: 0 0 calc(4px + var(--io-arrow-pulse) * 8px) var(--accent-dim);
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .io-arrow.is-live .io-arrow-svg {
+  .io-arrow.is-live .io-arrow-beam {
     animation: none;
+    opacity: 0.9;
+    box-shadow: 0 0 6px var(--accent-dim);
   }
 }
 
