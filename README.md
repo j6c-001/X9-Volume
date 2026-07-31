@@ -5,11 +5,12 @@ A tiny installable web app for Luxsin X9 volume control over your local network.
 ## Features
 
 - Device status and title at the top
-- Configurable input sources (enable, custom label, built-in icon)
-- Main-screen source selector that switches the X9 input
+- Configurable input sources and output routes (enable, custom label, built-in icon)
+- Main-screen **Input → Output** control — tap either side to pick from configured options
+- Flow arrow thickens and pulses with volume (quiets when muted)
 - Central volume knob (−100 dB to 0 dB line level) with stepped haptic feedback (Android Vibration API + click reinforcement; click-only where vibrate is unavailable)
 - Mute button in the knob center
-- Tabbed settings (Device / Appearance / Sources) with auto-save and close (X)
+- Tabbed settings (Device / Appearance / Sources / Outputs) with auto-save and close (X)
 - Offline-capable PWA shell (LAN required for device control)
 
 ## Setup
@@ -40,8 +41,9 @@ Uses the [Luxsin X9 Web API](https://am.luxsinaudio.com/ota/202607/x9/121c4/X9-A
 - Volume: `setting&volume=0..200` (mapped to −100..0 dB), snapped to the device `soundStep` (0.5 / 1 / 2 / 3 dB)
 - Mute: `setting&isDacMetuVolume=1`
 - Input: `setting&input=0..7`
+- Output: `setting&output=0..3` (XLR / RCA / Headphone / XLR + RCA)
 
-Stock input labels match the official Luxsin X9 UI (`RCA`, `HDMI-EARC`, `USB Driver`, etc.). In Settings you can hide unused inputs and override labels/icons — device icons (TV, streamer, turntable, DAC, …) plus connection icons (USB, optical, HDMI, …), stored in `localStorage` as `x9-sources`. Enable **Icon only on main screen** (`x9-source-icon-only`) to hide chip labels and show icons alone.
+Stock input labels match the official Luxsin X9 UI (`RCA`, `HDMI-EARC`, `USB Driver`, etc.). In Settings you can hide unused inputs/outputs and override labels/icons — device icons (TV, streamer, turntable, DAC, headphones, …) plus connection icons (USB, optical, HDMI, XLR, …), stored in `localStorage` as `x9-sources` / `x9-outputs`. Enable **Icon only on main screen** (`x9-source-icon-only`) to hide endpoint labels and show icons alone.
 
 ## Files
 

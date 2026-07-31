@@ -24,6 +24,8 @@ export const SOURCE_ICONS = [
   { id: 'bluetooth', label: 'Bluetooth' },
   { id: 'hdmi', label: 'HDMI' },
   { id: 'rca', label: 'RCA' },
+  { id: 'xlr', label: 'XLR' },
+  { id: 'headphones', label: 'Headphones' },
   { id: 'generic', label: 'Generic' },
 ];
 
@@ -59,6 +61,8 @@ const ICON_SVG = {
   bluetooth: `<path d="M7 7.5 17 16.5 12 21V3l5 4.5L7 16.5" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/>`,
   hdmi: `<path d="M3 9.5h18v5a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-5z" fill="none" stroke="currentColor" stroke-width="1.75"/><path d="M7 9.5V8h10v1.5M8.5 14.5h1M11.5 14.5h1M14.5 14.5h1" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>`,
   rca: `<circle cx="8" cy="12" r="3.25" fill="none" stroke="currentColor" stroke-width="1.75"/><circle cx="16" cy="12" r="3.25" fill="none" stroke="currentColor" stroke-width="1.75"/><circle cx="8" cy="12" r="1"/><circle cx="16" cy="12" r="1"/>`,
+  xlr: `<circle cx="12" cy="12" r="8" fill="none" stroke="currentColor" stroke-width="1.75"/><circle cx="12" cy="8.5" r="1.35"/><circle cx="8.8" cy="14.2" r="1.35"/><circle cx="15.2" cy="14.2" r="1.35"/>`,
+  headphones: `<path d="M4.5 13v3.5A2.5 2.5 0 0 0 7 19h1.25v-5.5H7A2.5 2.5 0 0 0 4.5 16V13zM19.5 13v3.5A2.5 2.5 0 0 1 17 19h-1.25v-5.5H17a2.5 2.5 0 0 1 2.5 2.5V13z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M4.5 13a7.5 7.5 0 0 1 15 0" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"/>`,
   generic: `<path d="M4 8.5 12 4l8 4.5v7L12 20l-8-4.5v-7z" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linejoin="round"/><path d="M12 12v8M4 8.5l8 3.5 8-3.5" fill="none" stroke="currentColor" stroke-width="1.5"/>`,
 };
 

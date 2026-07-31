@@ -6,6 +6,7 @@ export const state = {
   device: 'Luxsin-X9',
   title: 'Luxsin-X9',
   input: 0,
+  output: 0,
   audioFormat: '',
   version: '',
   volume: 100,
@@ -14,6 +15,7 @@ export const state = {
   dragging: false,
   togglingMute: false,
   selectingVu: false,
+  selectingIo: false,
   vu: 0,
   vuCount: 16,
   vuSensor: 0,
@@ -38,7 +40,8 @@ export function setState(partial) {
 export function mergeFromServer(data, force = false) {
   if (!force && (state.dragging || state.togglingMute)) return;
 
-  const title = data.input === 4 && data.bt_title
+  const inputForTitle = state.selectingIo ? state.input : (data.input ?? state.input);
+  const title = inputForTitle === 4 && data.bt_title
     ? data.bt_title
     : (data.device || 'Luxsin-X9');
 
@@ -47,7 +50,6 @@ export function mergeFromServer(data, force = false) {
     failures: 0,
     device: data.device || state.device,
     title,
-    input: data.input ?? state.input,
     audioFormat: data.audioFormat || '',
     version: data.version ?? state.version,
     volume: data.volume ?? state.volume,
@@ -55,6 +57,11 @@ export function mergeFromServer(data, force = false) {
     muted: !!data.isDacMetuVolume,
     msgCount: data.msgCount ?? state.msgCount,
   };
+
+  if (!state.selectingIo) {
+    if (data.input != null) next.input = data.input;
+    if (data.output != null) next.output = Math.max(0, Math.min(3, data.output | 0));
+  }
 
   if (!state.selectingVu) {
     if (data.vu != null) next.vu = Math.max(0, data.vu | 0);

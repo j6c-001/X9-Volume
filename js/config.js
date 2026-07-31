@@ -1,4 +1,4 @@
-import { getId, syncData, isValidIp, INPUT_LABELS } from './api.js';
+import { getId, syncData, isValidIp, INPUT_LABELS, OUTPUT_LABELS } from './api.js';
 import { state, setState } from './state.js';
 import { resetPoller } from './poller.js';
 import { APP_VERSION } from './version.js';
@@ -11,17 +11,26 @@ import {
   saveSourceIconOnly,
   sourceIconSvg,
 } from './sources.js';
+import {
+  getOutputConfig,
+  saveOutputConfig,
+} from './outputs.js';
 import { getShowVuSelector, saveShowVuSelector } from './vu.js';
 
-const PANELS = ['device', 'appearance', 'sources'];
+const PANELS = ['device', 'appearance', 'sources', 'outputs'];
 
-export function createConfigDialog({ onSourcesChanged, onVuVisibilityChanged } = {}) {
+export function createConfigDialog({
+  onSourcesChanged,
+  onOutputsChanged,
+  onVuVisibilityChanged,
+} = {}) {
   const overlay = document.getElementById('config-overlay');
   const closeBtn = document.getElementById('config-close');
   const input = document.getElementById('config-ip');
   const colorInput = document.getElementById('config-color');
   const swatchesRoot = document.getElementById('config-swatches');
   const sourcesRoot = document.getElementById('config-sources');
+  const outputsRoot = document.getElementById('config-outputs');
   const iconOnlyInput = document.getElementById('config-source-icon-only');
   const showVuInput = document.getElementById('config-show-vu');
   const statusEl = document.getElementById('config-status');
@@ -75,17 +84,28 @@ export function createConfigDialog({ onSourcesChanged, onVuVisibilityChanged } =
     onSourcesChanged?.();
   }
 
-  function renderSourcesEditor() {
-    const sources = getSourceConfig();
-    sourcesRoot.replaceChildren();
-    for (const entry of sources) {
-      const stock = INPUT_LABELS[entry.index] || `Input ${entry.index}`;
+  function persistOutputs(next) {
+    saveOutputConfig(next);
+    onOutputsChanged?.();
+  }
+
+  function renderIoEditor({
+    root,
+    entries,
+    stockLabels,
+    keyPrefix,
+    onPersist,
+    getConfig,
+  }) {
+    root.replaceChildren();
+    for (const entry of entries) {
+      const stock = stockLabels[entry.index] || `${keyPrefix} ${entry.index}`;
       const row = document.createElement('div');
       row.className = 'config-source-row';
       row.dataset.index = String(entry.index);
 
-      const enableId = `source-enable-${entry.index}`;
-      const labelId = `source-label-${entry.index}`;
+      const enableId = `${keyPrefix}-enable-${entry.index}`;
+      const labelId = `${keyPrefix}-label-${entry.index}`;
 
       row.innerHTML = `
         <label class="config-source-enable" for="${enableId}">
@@ -109,20 +129,20 @@ export function createConfigDialog({ onSourcesChanged, onVuVisibilityChanged } =
       const iconsRoot = row.querySelector('.config-source-icons');
 
       checkbox.addEventListener('change', () => {
-        const next = getSourceConfig();
+        const next = getConfig();
         next[entry.index] = { ...next[entry.index], enabled: checkbox.checked };
-        persistSources(next);
+        onPersist(next);
         row.classList.toggle('is-disabled', !checkbox.checked);
       });
       row.classList.toggle('is-disabled', !entry.enabled);
 
       labelInput.addEventListener('input', () => {
-        const next = getSourceConfig();
+        const next = getConfig();
         next[entry.index] = {
           ...next[entry.index],
           label: labelInput.value.trim().slice(0, 24),
         };
-        persistSources(next);
+        onPersist(next);
       });
 
       for (const icon of SOURCE_ICONS) {
@@ -135,9 +155,9 @@ export function createConfigDialog({ onSourcesChanged, onVuVisibilityChanged } =
         btn.innerHTML = sourceIconSvg(icon.id, 16);
         if (entry.icon === icon.id) btn.classList.add('is-active');
         btn.addEventListener('click', () => {
-          const next = getSourceConfig();
+          const next = getConfig();
           next[entry.index] = { ...next[entry.index], icon: icon.id };
-          persistSources(next);
+          onPersist(next);
           for (const b of iconsRoot.querySelectorAll('.config-source-icon-btn')) {
             b.classList.toggle('is-active', b.dataset.icon === icon.id);
           }
@@ -145,8 +165,30 @@ export function createConfigDialog({ onSourcesChanged, onVuVisibilityChanged } =
         iconsRoot.appendChild(btn);
       }
 
-      sourcesRoot.appendChild(row);
+      root.appendChild(row);
     }
+  }
+
+  function renderSourcesEditor() {
+    renderIoEditor({
+      root: sourcesRoot,
+      entries: getSourceConfig(),
+      stockLabels: INPUT_LABELS,
+      keyPrefix: 'source',
+      onPersist: persistSources,
+      getConfig: getSourceConfig,
+    });
+  }
+
+  function renderOutputsEditor() {
+    renderIoEditor({
+      root: outputsRoot,
+      entries: getOutputConfig(),
+      stockLabels: OUTPUT_LABELS,
+      keyPrefix: 'output',
+      onPersist: persistOutputs,
+      getConfig: getOutputConfig,
+    });
   }
 
   function setStatus(message, kind = '') {
@@ -182,6 +224,7 @@ export function createConfigDialog({ onSourcesChanged, onVuVisibilityChanged } =
         device: data.device || 'Luxsin-X9',
         title: data.input === 4 && data.bt_title ? data.bt_title : (data.device || 'Luxsin-X9'),
         input: data.input ?? 0,
+        output: data.output != null ? Math.max(0, Math.min(3, data.output | 0)) : 0,
         audioFormat: data.audioFormat || '',
         version: data.version ?? '',
         volume: data.volume ?? 100,
@@ -191,6 +234,7 @@ export function createConfigDialog({ onSourcesChanged, onVuVisibilityChanged } =
         vuCount: data.vu_count != null ? Math.max(1, data.vu_count | 0) : 16,
         vuSensor: data.vuSensor != null ? (data.vuSensor | 0) : 0,
         selectingVu: false,
+        selectingIo: false,
       });
       resetPoller();
       setStatus('Connected.', 'ok');
@@ -212,6 +256,7 @@ export function createConfigDialog({ onSourcesChanged, onVuVisibilityChanged } =
     iconOnlyInput.checked = getSourceIconOnly();
     showVuInput.checked = getShowVuSelector();
     renderSourcesEditor();
+    renderOutputsEditor();
     setStatus(state.ip && state.connected ? 'Connected.' : '', state.connected ? 'ok' : '');
     setPanel(state.ip ? panel : 'device');
     overlay.hidden = false;
@@ -241,6 +286,7 @@ export function createConfigDialog({ onSourcesChanged, onVuVisibilityChanged } =
   iconOnlyInput.addEventListener('change', () => {
     saveSourceIconOnly(iconOnlyInput.checked);
     onSourcesChanged?.();
+    onOutputsChanged?.();
   });
 
   showVuInput.addEventListener('change', () => {
