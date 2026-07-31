@@ -47,16 +47,11 @@ export function createVuSelector(root) {
       <span class="vu-entry-frame">
         <img class="vu-entry-img" id="vu-entry-img" alt="" width="954" height="394" decoding="async">
       </span>
-      <span class="vu-entry-meta">
-        <span class="vu-entry-kicker">Display</span>
-        <span class="vu-entry-label" id="vu-entry-label">VU 1</span>
-      </span>
     </button>
   `;
 
   const entryBtn = root.querySelector('#vu-entry');
   const entryImg = root.querySelector('#vu-entry-img');
-  const entryLabel = root.querySelector('#vu-entry-label');
 
   let open = false;
   let slidesBuiltFor = -1;
@@ -211,9 +206,7 @@ export function createVuSelector(root) {
     if (!show && open) closeSheet();
 
     const i = clampVu(state.vu);
-    const label = styleLabel(i);
-    entryLabel.textContent = label;
-    entryBtn.setAttribute('aria-label', `Display style, ${label}`);
+    entryBtn.setAttribute('aria-label', `Display style, ${styleLabel(i)}`);
     entryBtn.disabled = !state.connected;
 
     const src = vuImageUrl(i);
