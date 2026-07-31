@@ -203,6 +203,15 @@ body {
   text-overflow: ellipsis;
 }
 
+.source-chip.is-icon-only {
+  min-width: 44px;
+  padding: 10px;
+}
+
+.source-strip.is-icon-only {
+  justify-content: center;
+}
+
 .knob-stack {
   position: relative;
   width: min(92vw, 72dvh, 460px);
@@ -459,6 +468,24 @@ body {
   font-size: 0.75rem;
   color: var(--muted);
   line-height: 1.35;
+}
+
+.config-toggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--text);
+  cursor: pointer;
+}
+
+.config-toggle input {
+  width: 16px;
+  height: 16px;
+  accent-color: var(--accent);
+  flex-shrink: 0;
 }
 
 .config-sources {

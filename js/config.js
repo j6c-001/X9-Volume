@@ -7,6 +7,8 @@ import {
   SOURCE_ICONS,
   getSourceConfig,
   saveSourceConfig,
+  getSourceIconOnly,
+  saveSourceIconOnly,
   sourceIconSvg,
 } from './sources.js';
 
@@ -17,12 +19,14 @@ export function createConfigDialog({ onSourcesChanged } = {}) {
   const colorInput = document.getElementById('config-color');
   const swatchesRoot = document.getElementById('config-swatches');
   const sourcesRoot = document.getElementById('config-sources');
+  const iconOnlyInput = document.getElementById('config-source-icon-only');
   const error = document.getElementById('config-error');
   const cancelBtn = document.getElementById('config-cancel');
   const versionEl = document.getElementById('config-version');
   let draftColor = getKnobColor();
   let savedColorOnOpen = draftColor;
   let draftSources = getSourceConfig();
+  let draftIconOnly = getSourceIconOnly();
 
   versionEl.textContent = `App v${APP_VERSION}`;
 
@@ -130,11 +134,17 @@ export function createConfigDialog({ onSourcesChanged } = {}) {
     applyKnobColor(draftColor);
     syncSwatchActive();
     draftSources = getSourceConfig().map((s) => ({ ...s }));
+    draftIconOnly = getSourceIconOnly();
+    iconOnlyInput.checked = draftIconOnly;
     renderSourcesEditor();
     error.textContent = '';
     overlay.hidden = false;
     input.focus();
   }
+
+  iconOnlyInput.addEventListener('change', () => {
+    draftIconOnly = iconOnlyInput.checked;
+  });
 
   function close() {
     overlay.hidden = true;
@@ -170,6 +180,7 @@ export function createConfigDialog({ onSourcesChanged } = {}) {
     saveKnobColor(draftColor);
     savedColorOnOpen = draftColor;
     saveSourceConfig(draftSources);
+    saveSourceIconOnly(draftIconOnly);
     onSourcesChanged?.();
 
     error.textContent = 'Connecting…';

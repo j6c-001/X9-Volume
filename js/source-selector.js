@@ -1,6 +1,11 @@
 import { setInput } from './api.js';
 import { state, setState, haptic } from './state.js';
-import { getSourceConfig, visibleSources, sourceIconSvg } from './sources.js';
+import {
+  getSourceConfig,
+  getSourceIconOnly,
+  visibleSources,
+  sourceIconSvg,
+} from './sources.js';
 
 export function createSourceSelector(root) {
   let switching = false;
@@ -31,7 +36,9 @@ export function createSourceSelector(root) {
     const config = getSourceConfig();
     const sources = visibleSources(state.input, config);
     const active = state.input | 0;
+    const iconOnly = getSourceIconOnly();
 
+    strip.classList.toggle('is-icon-only', iconOnly);
     strip.replaceChildren();
     for (const source of sources) {
       const btn = document.createElement('button');
@@ -39,14 +46,17 @@ export function createSourceSelector(root) {
       btn.className = 'source-chip';
       btn.setAttribute('role', 'option');
       btn.setAttribute('aria-selected', source.index === active ? 'true' : 'false');
+      btn.setAttribute('aria-label', source.label);
+      btn.title = source.label;
       btn.dataset.index = String(source.index);
       if (source.index === active) btn.classList.add('is-active');
+      if (iconOnly) btn.classList.add('is-icon-only');
       if (!state.connected) btn.disabled = true;
 
-      btn.innerHTML = `
-        ${sourceIconSvg(source.icon, 18)}
-        <span class="source-chip-label">${escapeHtml(source.label)}</span>
-      `;
+      const iconSize = iconOnly ? 22 : 18;
+      btn.innerHTML = iconOnly
+        ? sourceIconSvg(source.icon, iconSize)
+        : `${sourceIconSvg(source.icon, iconSize)}<span class="source-chip-label">${escapeHtml(source.label)}</span>`;
       btn.addEventListener('click', () => select(source.index));
       strip.appendChild(btn);
     }

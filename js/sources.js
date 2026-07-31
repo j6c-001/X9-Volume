@@ -1,6 +1,7 @@
 import { INPUT_LABELS } from './api.js';
 
 const SOURCES_KEY = 'x9-sources';
+const ICON_ONLY_KEY = 'x9-source-icon-only';
 
 /** Built-in icon ids available in Settings and the main selector. */
 export const SOURCE_ICONS = [
@@ -107,6 +108,16 @@ export function saveSourceConfig(config) {
   const normalized = INPUT_LABELS.map((_, index) => normalizeEntry(config?.[index], index));
   localStorage.setItem(SOURCES_KEY, JSON.stringify(normalized));
   return normalized;
+}
+
+/** When true, the main source strip shows icons without text labels. */
+export function getSourceIconOnly() {
+  return localStorage.getItem(ICON_ONLY_KEY) === '1';
+}
+
+export function saveSourceIconOnly(enabled) {
+  localStorage.setItem(ICON_ONLY_KEY, enabled ? '1' : '0');
+  return !!enabled;
 }
 
 /** Resolved display fields for a device input index. */
