@@ -1,15 +1,16 @@
 import { getMsgCount, syncData } from './api.js';
 import { state, setState, mergeFromServer } from './state.js';
 
+const POLL_MS = 400;
+
 let timer = null;
 let lastMsgCount = null;
 let abortController = null;
 
 async function tick() {
-  const interval = 400;
 
   if (document.hidden || !state.ip) {
-    timer = setTimeout(tick, interval);
+    timer = setTimeout(tick, POLL_MS);
     return;
   }
 
@@ -27,7 +28,7 @@ async function tick() {
     }
   } catch (e) {
     if (e.name === 'AbortError') {
-      timer = setTimeout(tick, interval);
+      timer = setTimeout(tick, POLL_MS);
       return;
     }
     const failures = state.failures + 1;
@@ -37,7 +38,7 @@ async function tick() {
     });
   }
 
-  timer = setTimeout(tick, interval);
+  timer = setTimeout(tick, POLL_MS);
 }
 
 export function startPoller() {

@@ -126,90 +126,148 @@ body {
 
 .knob-stack {
   position: relative;
-  width: min(70vw, 320px);
+  width: min(92vw, 72dvh, 460px);
   aspect-ratio: 1;
-}
-
-.knob-dial {
-  width: 100%;
-  height: 100%;
   touch-action: none;
   user-select: none;
   -webkit-user-select: none;
   cursor: grab;
+  -webkit-tap-highlight-color: transparent;
 }
 
-.knob-dial:active {
+.knob-stack.is-dragging {
   cursor: grabbing;
 }
 
-.knob-dial.disabled,
-.knob-dial.is-muted {
-  opacity: 0.35;
-  pointer-events: none;
+.knob-stack.disabled,
+.knob-stack.is-muted {
   cursor: default;
+}
+
+.knob-stack.disabled {
+  opacity: 0.4;
+}
+
+.knob-stack.is-muted .knob-fill {
+  stroke: #555;
+  filter: none;
+}
+
+.knob-stack.is-muted .knob-handle {
+  fill: #555;
+  stroke: #555;
+  filter: none;
+}
+
+.knob-stack.is-muted .knob-indicator {
+  stroke: #555;
+  filter: none;
+}
+
+.knob-stack.is-muted .knob-body {
+  opacity: 0.4;
+}
+
+.knob-stack.is-muted {
+  cursor: default;
+}
+
+.knob-stack.disabled .knob-body {
+  pointer-events: none;
 }
 
 .knob-svg {
   width: 100%;
   height: 100%;
   display: block;
+  overflow: visible;
 }
 
 .knob-track {
   fill: none;
-  stroke: #22222c;
-  stroke-width: 14;
+  stroke: #1a1a22;
+  stroke-width: 22;
   stroke-linecap: round;
 }
 
 .knob-fill {
   fill: none;
   stroke: var(--accent);
-  stroke-width: 14;
+  stroke-width: 22;
   stroke-linecap: round;
-  filter: drop-shadow(0 0 6px var(--accent-dim));
-  transition: stroke 0.15s ease;
+  filter: drop-shadow(0 0 10px var(--accent-dim));
 }
 
-.knob-wrap.disabled .knob-fill {
-  stroke: #555;
-  filter: none;
+.knob-body {
+  pointer-events: none;
+  will-change: transform;
 }
 
-.knob-dial.is-muted .knob-fill {
-  stroke: #555;
-  filter: none;
+.knob-body-rim {
+  fill: none;
+  stroke: #4a4a5a;
+  stroke-width: 3;
 }
 
-.knob-dot {
+.knob-body-inner {
+  fill: none;
+  stroke: rgba(255, 255, 255, 0.06);
+  stroke-width: 2;
+}
+
+.knob-tick {
+  stroke: rgba(255, 255, 255, 0.14);
+  stroke-width: 2;
+  stroke-linecap: round;
+}
+
+.knob-indicator {
+  stroke: var(--accent);
+  stroke-width: 5;
+  stroke-linecap: round;
+  filter: drop-shadow(0 0 4px var(--accent-dim));
+}
+
+.knob-handle {
   fill: var(--text);
-  filter: drop-shadow(0 1px 4px rgba(0, 0, 0, 0.5));
+  stroke: var(--bg);
+  stroke-width: 3;
+  filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.55));
+  pointer-events: none;
 }
 
 .knob-readout {
   position: absolute;
-  top: 28%;
   left: 50%;
+  bottom: 2.5%;
+  top: auto;
   transform: translateX(-50%);
-  font-size: clamp(1.1rem, 4.5vw, 1.5rem);
-  font-weight: 500;
+  z-index: 1;
+  font-size: clamp(1.2rem, 5vw, 1.65rem);
+  font-weight: 600;
   font-variant-numeric: tabular-nums;
-  letter-spacing: -0.02em;
+  letter-spacing: -0.03em;
   pointer-events: none;
+  text-shadow: 0 2px 12px rgba(0, 0, 0, 0.65);
+  color: var(--text);
+}
+
+.knob-readout.is-muted {
+  color: var(--muted);
+  opacity: 0.55;
 }
 
 .knob-mute {
   position: absolute;
   top: 50%;
   left: 50%;
-  transform: translate(-50%, calc(-50% + 12%));
+  transform: translate(-50%, -50%);
   z-index: 2;
-  width: 56px;
-  height: 56px;
-  border: none;
+  width: 72px;
+  height: 72px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 50%;
-  background: rgba(20, 20, 28, 0.85);
+  background: rgba(12, 12, 18, 0.92);
   color: var(--text);
   display: flex;
   align-items: center;
@@ -217,6 +275,7 @@ body {
   cursor: pointer;
   touch-action: manipulation;
   -webkit-tap-highlight-color: transparent;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06), 0 4px 16px rgba(0, 0, 0, 0.4);
 }
 
 .knob-mute:active {
@@ -233,7 +292,8 @@ body {
 
 .knob-mute.is-muted {
   color: var(--danger);
-  background: rgba(255, 69, 58, 0.12);
+  background: rgba(255, 69, 58, 0.14);
+  border-color: rgba(255, 69, 58, 0.35);
 }
 
 .knob-mute.is-muted .mute-on {
@@ -279,9 +339,9 @@ body {
   line-height: 1.4;
 }
 
-.config-dialog input {
+.config-dialog input[type="text"] {
   width: 100%;
-  margin-top: 16px;
+  margin-top: 6px;
   padding: 12px 14px;
   border: 1px solid #2a2a35;
   border-radius: 10px;
@@ -290,9 +350,79 @@ body {
   font-size: 1rem;
 }
 
-.config-dialog input:focus {
+.config-field-label {
+  display: block;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--muted);
+  margin-bottom: 8px;
+}
+
+.config-field-label[for="config-ip"] {
+  margin-top: 16px;
+  margin-bottom: 0;
+}
+
+.config-dialog input[type="text"]:focus {
   outline: 2px solid var(--accent-dim);
   border-color: var(--accent);
+}
+
+.config-field {
+  margin-top: 18px;
+}
+
+.config-swatches {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+
+.config-swatch {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  padding: 0;
+  cursor: pointer;
+  background: var(--swatch, var(--accent));
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.12);
+  -webkit-tap-highlight-color: transparent;
+}
+
+.config-swatch.is-active {
+  border-color: var(--text);
+  box-shadow: 0 0 0 2px var(--bg), 0 0 0 4px var(--swatch, var(--accent));
+}
+
+.config-color-custom {
+  width: 34px !important;
+  height: 34px;
+  margin-top: 0 !important;
+  padding: 0 !important;
+  border-radius: 50% !important;
+  border: 2px solid #2a2a35 !important;
+  background: transparent;
+  cursor: pointer;
+  overflow: hidden;
+}
+
+.config-color-custom::-webkit-color-swatch-wrapper {
+  padding: 0;
+}
+
+.config-color-custom::-webkit-color-swatch {
+  border: none;
+  border-radius: 50%;
+}
+
+.config-version {
+  margin-top: 18px;
+  font-size: 0.75rem;
+  color: var(--muted);
+  text-align: center;
+  letter-spacing: 0.02em;
 }
 
 .config-error {

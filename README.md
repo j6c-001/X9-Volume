@@ -18,7 +18,11 @@ Serve the static files from this directory:
 python3 -m http.server 8080
 ```
 
-Open `http://localhost:8080` on your phone (same LAN as the X9). Enter the device IP in settings.
+Open the app on your phone (same LAN as the X9). Enter the device IP in settings.
+
+The app is intended to be served over **HTTPS** (e.g. [GitHub Pages](https://j6c-001.github.io/X9-Volume/)). Device API calls use plain HTTP on your LAN, so browsers log **mixed content** warnings in the console. That is expected and does not affect the PWA shell itself.
+
+App version is in `js/version.js` (`APP_VERSION`) and shown in Settings. Bump it on every submit.
 
 ## Install
 

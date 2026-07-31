@@ -46,12 +46,18 @@ export function formatFirmwareVersion(value) {
   return `${Math.floor(n / 1000)}.${Math.floor((n % 1000) / 100)}.0.${n % 10}`;
 }
 
-function base(ip) {
-  return `http://${ip}`;
+export function deviceFetch(ip, path, options = {}) {
+  const url = `http://${ip}${path}`;
+  return fetch(url, {
+    method: 'GET',
+    mode: 'cors',
+    credentials: 'omit',
+    ...options,
+  });
 }
 
 export async function getMsgCount(ip, signal) {
-  const res = await fetch(`${base(ip)}/msgCount`, { signal });
+  const res = await deviceFetch(ip, '/msgCount', { signal });
   if (!res.ok) throw new Error('msgCount failed');
   const n = parseInt(await res.text(), 10);
   if (Number.isNaN(n)) throw new Error('invalid msgCount');
@@ -59,24 +65,24 @@ export async function getMsgCount(ip, signal) {
 }
 
 export async function syncData(ip, signal) {
-  const res = await fetch(`${base(ip)}/dev/info.cgi?action=syncData`, { signal });
+  const res = await deviceFetch(ip, '/dev/info.cgi?action=syncData', { signal });
   if (!res.ok) throw new Error('syncData failed');
   return decodeCustomBase64(await res.text());
 }
 
 export async function getId(ip, signal) {
-  const res = await fetch(`${base(ip)}/dev/info.cgi?action=getId`, { signal });
+  const res = await deviceFetch(ip, '/dev/info.cgi?action=getId', { signal });
   if (!res.ok) throw new Error('getId failed');
   return res.json();
 }
 
 export async function setVolume(ip, volume) {
-  const res = await fetch(`${base(ip)}/dev/info.cgi?action=setting&volume=${volume}`);
+  const res = await deviceFetch(ip, `/dev/info.cgi?action=setting&volume=${volume}`);
   return res.ok;
 }
 
 export async function toggleMute(ip) {
-  const res = await fetch(`${base(ip)}/dev/info.cgi?action=setting&isDacMetuVolume=1`);
+  const res = await deviceFetch(ip, '/dev/info.cgi?action=setting&isDacMetuVolume=1');
   return res.ok;
 }
 
