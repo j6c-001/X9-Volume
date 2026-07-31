@@ -1,25 +1,40 @@
 /**
  * Tactile feedback for the volume dial.
- * Uses Vibration API when available; falls back to a short Web Audio click
- * (e.g. iOS Safari has no vibrate support).
+ * Prefers the Vibration API on Android Chrome; always layers a short Web Audio
+ * click so feedback is still felt/heard when vibrate is blocked, too short for
+ * the motor, or unavailable (iOS).
  */
 
 let audioCtx = null;
 let lastPulseAt = 0;
+let vibrateBlocked = false;
 
 function canVibrate() {
   return typeof navigator !== 'undefined' && typeof navigator.vibrate === 'function';
 }
 
+/**
+ * @returns {boolean} true only when the browser accepted the vibration request.
+ * Chrome returns false without sticky user activation, in a hidden document, etc.
+ */
 function vibrate(pattern) {
-  if (!canVibrate()) return false;
+  if (!canVibrate() || vibrateBlocked) return false;
   try {
-    navigator.vibrate(0);
-    navigator.vibrate(pattern);
-    return true;
+    // Do not call vibrate(0) first — cancelling immediately before a short pulse
+    // can drop the pulse on some Android builds.
+    const ok = navigator.vibrate(pattern);
+    if (!ok) vibrateBlocked = true;
+    return !!ok;
   } catch (_) {
+    vibrateBlocked = true;
     return false;
   }
+}
+
+/** Clear the blocked latch after a fresh user gesture (pointerdown). */
+export function armHaptics() {
+  vibrateBlocked = false;
+  ensureAudio();
 }
 
 function ensureAudio() {
@@ -30,11 +45,6 @@ function ensureAudio() {
     audioCtx.resume().catch(() => {});
   }
   return audioCtx;
-}
-
-/** Resume audio graph from a user gesture so iOS can play ticks. */
-export function armHaptics() {
-  ensureAudio();
 }
 
 function playClick({ freq = 210, gain = 0.03, ms = 16 } = {}) {
@@ -57,32 +67,40 @@ function playClick({ freq = 210, gain = 0.03, ms = 16 } = {}) {
 function pulse(kind) {
   const now = performance.now();
   // Keep rapid dial ticks crisp without stacking into a continuous buzz.
-  const minGap = kind === 'tick' ? 12 : kind === 'major' ? 18 : 0;
+  const minGap = kind === 'tick' ? 16 : kind === 'major' ? 22 : 0;
   if (minGap && now - lastPulseAt < minGap) return;
   lastPulseAt = now;
 
+  // Android vibration motors rarely register sub-~20ms pulses. Use longer
+  // durations, and always reinforce with a soft click (vibrate can report
+  // success yet still be suppressed by DND / battery saver).
   if (kind === 'tick') {
-    if (!vibrate(5)) playClick({ freq: 240, gain: 0.022, ms: 12 });
+    vibrate(28);
+    playClick({ freq: 250, gain: 0.028, ms: 14 });
     return;
   }
   if (kind === 'major') {
-    if (!vibrate(10)) playClick({ freq: 170, gain: 0.034, ms: 18 });
+    vibrate(42);
+    playClick({ freq: 180, gain: 0.04, ms: 20 });
     return;
   }
   if (kind === 'endstop') {
-    if (!vibrate([14, 32, 22])) playClick({ freq: 120, gain: 0.045, ms: 28 });
+    vibrate([35, 40, 50]);
+    playClick({ freq: 110, gain: 0.05, ms: 30 });
     return;
   }
   if (kind === 'grab') {
-    if (!vibrate(8)) playClick({ freq: 150, gain: 0.02, ms: 14 });
+    vibrate(32);
+    playClick({ freq: 150, gain: 0.024, ms: 16 });
     return;
   }
   if (kind === 'release') {
-    if (!vibrate(6)) playClick({ freq: 190, gain: 0.018, ms: 12 });
+    vibrate(24);
+    playClick({ freq: 200, gain: 0.02, ms: 12 });
     return;
   }
-  // impact / default tap
-  if (!vibrate(12)) playClick({ freq: 160, gain: 0.03, ms: 16 });
+  vibrate(36);
+  playClick({ freq: 160, gain: 0.034, ms: 18 });
 }
 
 /** Light detent while turning the dial. */
