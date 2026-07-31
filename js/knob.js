@@ -1,5 +1,6 @@
 import { toDb, toVolume, setVolume, toggleMute } from './api.js';
 import { state, setState, haptic } from './state.js';
+import { forceSync } from './poller.js';
 
 const MIN_DB = -100;
 const MAX_DB = 0;
@@ -31,16 +32,17 @@ export function createKnob(root) {
   const CX = SIZE / 2;
   const CY = SIZE / 2;
   const R = 120;
-  const STROKE = 14;
 
   root.innerHTML = `
-    <div class="knob-wrap" id="knob-wrap">
-      <svg class="knob-svg" viewBox="0 0 ${SIZE} ${SIZE}" aria-hidden="true">
-        <path class="knob-track" d="${describeArc(CX, CY, R, START_ANGLE, START_ANGLE + SWEEP)}" />
-        <path class="knob-fill" id="knob-fill" d="${describeArc(CX, CY, R, START_ANGLE, START_ANGLE)}" />
-        <circle class="knob-dot" id="knob-dot" cx="${CX}" cy="${CY}" r="8" />
-      </svg>
-      <div class="knob-readout" id="knob-readout">-50.0 dB</div>
+    <div class="knob-stack">
+      <div class="knob-dial" id="knob-dial">
+        <svg class="knob-svg" viewBox="0 0 ${SIZE} ${SIZE}" aria-hidden="true">
+          <path class="knob-track" d="${describeArc(CX, CY, R, START_ANGLE, START_ANGLE + SWEEP)}" />
+          <path class="knob-fill" id="knob-fill" d="${describeArc(CX, CY, R, START_ANGLE, START_ANGLE)}" />
+          <circle class="knob-dot" id="knob-dot" cx="${CX}" cy="${CY}" r="8" />
+        </svg>
+        <div class="knob-readout" id="knob-readout">-50.0 dB</div>
+      </div>
       <button type="button" class="knob-mute" id="knob-mute" aria-label="Mute">
         <svg viewBox="0 0 24 24" width="28" height="28" aria-hidden="true">
           <path class="mute-on" d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/>
@@ -50,7 +52,7 @@ export function createKnob(root) {
     </div>
   `;
 
-  const wrap = root.querySelector('#knob-wrap');
+  const dial = root.querySelector('#knob-dial');
   const fill = root.querySelector('#knob-fill');
   const dot = root.querySelector('#knob-dot');
   const readout = root.querySelector('#knob-readout');
@@ -70,13 +72,14 @@ export function createKnob(root) {
   }
 
   function flushVolume() {
-    if (pendingVolume === null || !state.ip) return;
+    if (pendingVolume === null || !state.ip || state.muted) return;
     const v = pendingVolume;
     pendingVolume = null;
     setVolume(state.ip, v).catch(() => {});
   }
 
   function scheduleVolume(volume) {
+    if (state.muted) return;
     pendingVolume = volume;
     if (throttleTimer) return;
     throttleTimer = setTimeout(() => {
@@ -86,6 +89,7 @@ export function createKnob(root) {
   }
 
   function applyDb(db) {
+    if (state.muted) return;
     const volume = toVolume(db, state.soundStep);
     localDb = toDb(volume);
     render(localDb);
@@ -94,7 +98,7 @@ export function createKnob(root) {
   }
 
   function pointerAngle(clientX, clientY) {
-    const rect = wrap.getBoundingClientRect();
+    const rect = dial.getBoundingClientRect();
     const x = clientX - rect.left - rect.width / 2;
     const y = clientY - rect.top - rect.height / 2;
     return (Math.atan2(y, x) * 180) / Math.PI;
@@ -107,16 +111,19 @@ export function createKnob(root) {
   let startY = 0;
   let lastPointerAngle = null;
 
+  function canAdjustVolume() {
+    return state.connected && !state.poweredOff && !state.muted;
+  }
+
   function onPointerDown(e) {
-    if (!state.connected || state.poweredOff) return;
-    if (e.target.closest('#knob-mute')) return;
+    if (!canAdjustVolume()) return;
 
     pointerDown = true;
     dragActive = false;
     startX = e.clientX;
     startY = e.clientY;
     lastPointerAngle = null;
-    wrap.setPointerCapture(e.pointerId);
+    dial.setPointerCapture(e.pointerId);
   }
 
   function onPointerMove(e) {
@@ -153,32 +160,42 @@ export function createKnob(root) {
 
     dragActive = false;
     lastPointerAngle = null;
-    try { wrap.releasePointerCapture(e.pointerId); } catch (_) {}
+    try { dial.releasePointerCapture(e.pointerId); } catch (_) {}
   }
 
-  wrap.addEventListener('pointerdown', onPointerDown);
-  wrap.addEventListener('pointermove', onPointerMove);
-  wrap.addEventListener('pointerup', onPointerUp);
-  wrap.addEventListener('pointercancel', onPointerUp);
+  dial.addEventListener('pointerdown', onPointerDown);
+  dial.addEventListener('pointermove', onPointerMove);
+  dial.addEventListener('pointerup', onPointerUp);
+  dial.addEventListener('pointercancel', onPointerUp);
 
-  muteBtn.addEventListener('click', async (e) => {
+  async function onMute(e) {
+    e.preventDefault();
     e.stopPropagation();
-    if (!state.ip || state.poweredOff) return;
+    if (!state.ip || state.poweredOff || state.togglingMute) return;
+
     haptic();
-    setState({ togglingMute: true, muted: !state.muted });
+    setState({ togglingMute: true });
     try {
       await toggleMute(state.ip);
+      await forceSync();
     } catch (_) {
-      setState({ muted: !state.muted });
+      await forceSync();
     } finally {
-      setTimeout(() => setState({ togglingMute: false }), 300);
+      setState({ togglingMute: false });
     }
-  });
+  }
+
+  muteBtn.addEventListener('pointerup', onMute);
+  muteBtn.addEventListener('click', (e) => e.preventDefault());
 
   function syncFromState() {
-    wrap.classList.toggle('disabled', !state.connected || state.poweredOff);
+    const unavailable = !state.connected || state.poweredOff;
+    dial.classList.toggle('disabled', unavailable);
+    dial.classList.toggle('is-muted', state.muted);
     muteBtn.classList.toggle('is-muted', state.muted);
-    muteBtn.disabled = !state.connected || state.poweredOff;
+    muteBtn.disabled = unavailable;
+    muteBtn.setAttribute('aria-label', state.muted ? 'Unmute' : 'Mute');
+
     if (!state.dragging) {
       localDb = toDb(state.volume);
       render(localDb);

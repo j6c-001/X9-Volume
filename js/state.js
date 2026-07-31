@@ -32,8 +32,8 @@ export function setState(partial) {
   emit();
 }
 
-export function mergeFromServer(data) {
-  if (state.dragging || state.togglingMute || state.poweringOff) return;
+export function mergeFromServer(data, force = false) {
+  if (!force && (state.dragging || state.togglingMute || state.poweringOff)) return;
 
   const title = data.input === 4 && data.bt_title
     ? data.bt_title

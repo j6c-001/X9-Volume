@@ -62,3 +62,18 @@ export function resetPoller() {
   lastMsgCount = null;
   startPoller();
 }
+
+export async function forceSync() {
+  if (!state.ip) return null;
+  try {
+    abortController?.abort();
+    abortController = new AbortController();
+    const data = await syncData(state.ip, abortController.signal);
+    if (data.msgCount != null) lastMsgCount = data.msgCount;
+    mergeFromServer(data, true);
+    setState({ connected: true, failures: 0 });
+    return data;
+  } catch (_) {
+    return null;
+  }
+}
