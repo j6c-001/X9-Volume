@@ -1,13 +1,13 @@
 const COLOR_KEY = 'x9-knob-color';
-const DEFAULT_COLOR = '#5eead4';
+const DEFAULT_COLOR = '#d2a06a';
 
 export const KNOB_COLORS = [
-  { id: 'teal', hex: '#5eead4', label: 'Teal' },
-  { id: 'amber', hex: '#f5a524', label: 'Amber' },
-  { id: 'rose', hex: '#ff6b8a', label: 'Rose' },
-  { id: 'blue', hex: '#6ea8fe', label: 'Blue' },
-  { id: 'lime', hex: '#a3e635', label: 'Lime' },
-  { id: 'violet', hex: '#c4b5fd', label: 'Violet' },
+  { id: 'copper', hex: '#d2a06a', label: 'Copper' },
+  { id: 'gold', hex: '#c9b27a', label: 'Gold' },
+  { id: 'ember', hex: '#d4784a', label: 'Ember' },
+  { id: 'steel', hex: '#8fa3b5', label: 'Steel' },
+  { id: 'jade', hex: '#6a9e8b', label: 'Jade' },
+  { id: 'ivory', hex: '#d6d0c4', label: 'Ivory' },
 ];
 
 function normalizeHex(value) {

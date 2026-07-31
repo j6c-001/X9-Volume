@@ -11,8 +11,8 @@
   --surface: #14141c;
   --text: #f2f2f7;
   --muted: #8e8e93;
-  --accent: #5eead4;
-  --accent-dim: rgba(94, 234, 212, 0.25);
+  --accent: #d2a06a;
+  --accent-dim: rgba(210, 160, 106, 0.28);
   --danger: #ff453a;
   --safe-top: env(safe-area-inset-top, 0px);
   --safe-bottom: env(safe-area-inset-bottom, 0px);
