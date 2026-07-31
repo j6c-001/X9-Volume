@@ -140,17 +140,16 @@ export function createKnob(root) {
     return getLoudGateDb(softMaxDb());
   }
 
-  /** 0..1 warning heat — rises through the approach into the loud zone, peaks at soft max. */
+  /**
+   * 0..1 warning heat — only inside the loud zone (soft max − 12 dB → soft max).
+   * Knob colour must not tint below the gate.
+   */
   function warningHeat(db) {
     const max = softMaxDb();
     const gate = loudGateDb();
     const span = Math.max(1e-6, max - gate);
-    const pre = 10;
-    if (db <= gate - pre) return 0;
-    if (db <= gate) {
-      return 0.2 * ((db - (gate - pre)) / pre);
-    }
-    return Math.min(1, 0.2 + 0.55 * ((db - gate) / span));
+    if (db < gate - 1e-6) return 0;
+    return Math.min(1, (db - gate) / span);
   }
 
   function warnColor(heat, alpha = 1) {
@@ -166,15 +165,16 @@ export function createKnob(root) {
     const max = softMaxDb();
     const angle = dbToAngle(db);
     const maxAngle = dbToAngle(max);
+    const gate = loudGateDb();
     const heat = warningHeat(db);
     const muted = state.muted;
-    const warning = !muted && heat > 0.02;
+    const inLoudZone = !muted && heat > 0;
 
     fill.setAttribute('d', describeArc(CX, CY, TRACK_R, START_ANGLE, angle));
 
-    // Remaining usable arc (current → soft max); pulse strength rises as headroom shrinks.
-    const headroomStart = Math.min(db, max);
-    if (warning && maxAngle - dbToAngle(headroomStart) > 0.15) {
+    // Remaining usable arc only once inside the loud zone; pulse rises toward the ceiling.
+    const headroomStart = Math.min(Math.max(db, gate), max);
+    if (inLoudZone && maxAngle - dbToAngle(headroomStart) > 0.15) {
       headroom.setAttribute(
         'd',
         describeArc(CX, CY, TRACK_R, dbToAngle(headroomStart), maxAngle),
@@ -197,7 +197,7 @@ export function createKnob(root) {
     fill.style.stroke = '';
     fill.style.filter = '';
 
-    if (warning) {
+    if (inLoudZone) {
       handle.style.fill = warnColor(heat * 0.7, 1);
       handle.style.stroke = 'var(--bg)';
       stack.style.setProperty('--knob-warn', warnColor(heat, 1));
@@ -214,7 +214,7 @@ export function createKnob(root) {
     body.style.transform = `rotate(${dbToKnobRotation(db)}deg)`;
     body.style.transformOrigin = `${CX}px ${CY}px`;
     readout.textContent = `${db.toFixed(1)} dB`;
-    stack.classList.toggle('is-warning', warning);
+    stack.classList.toggle('is-warning', inLoudZone);
   }
 
   function flushVolume() {
