@@ -1,4 +1,4 @@
-import { getId, syncData, isValidIp, usesLocalNetworkPermission } from './api.js';
+import { getId, syncData, isValidIp, usesLocalNetworkPermission, requestLocalNetworkAccess } from './api.js';
 import { state, setState } from './state.js';
 import { resetPoller } from './poller.js';
 
@@ -40,7 +40,7 @@ export function createConfigDialog() {
       : 'Connecting…';
     try {
       const ctrl = new AbortController();
-      await getId(ip, ctrl.signal);
+      await requestLocalNetworkAccess(ip, ctrl.signal);
       const data = await syncData(ip, ctrl.signal);
       localStorage.setItem('x9-device-ip', ip);
       setState({
@@ -62,7 +62,7 @@ export function createConfigDialog() {
       close();
     } catch (_) {
       error.textContent = usesLocalNetworkPermission()
-        ? 'Could not reach device. Allow local network access when prompted, then try again.'
+        ? 'Could not reach device. Click Save again and choose Allow when Chrome asks for local network access. The X9 must also reply to CORS preflight with Access-Control-Allow-Private-Network: true.'
         : 'Could not reach device. Check IP and LAN connection.';
     }
   });

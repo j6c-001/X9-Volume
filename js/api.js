@@ -63,10 +63,20 @@ export function usesLocalNetworkPermission() {
 }
 
 export function deviceFetch(ip, path, options = {}) {
-  return fetch(`http://${ip}${path}`, {
+  const url = `http://${ip}${path}`;
+  const init = {
+    method: 'GET',
+    mode: 'cors',
+    credentials: 'omit',
     ...options,
     targetAddressSpace: getTargetAddressSpace(ip),
-  });
+  };
+  return fetch(new Request(url, init));
+}
+
+/** Probe device on user gesture so Chrome can show Local Network Access prompt. */
+export async function requestLocalNetworkAccess(ip, signal) {
+  return getId(ip, signal);
 }
 
 export async function getMsgCount(ip, signal) {

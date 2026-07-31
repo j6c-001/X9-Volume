@@ -1,12 +1,19 @@
-import { getMsgCount, syncData } from './api.js';
+import { getMsgCount, syncData, usesLocalNetworkPermission } from './api.js';
 import { state, setState, mergeFromServer } from './state.js';
 
 let timer = null;
 let lastMsgCount = null;
 let abortController = null;
 
+function pollInterval() {
+  if (!usesLocalNetworkPermission()) return 400;
+  if (state.failures >= 10) return 5000;
+  if (state.failures >= 3) return 2000;
+  return 400;
+}
+
 async function tick() {
-  const interval = 400;
+  const interval = pollInterval();
 
   if (document.hidden || !state.ip) {
     timer = setTimeout(tick, interval);
