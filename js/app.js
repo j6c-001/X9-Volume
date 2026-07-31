@@ -19,12 +19,13 @@ const settingsBtn = document.getElementById('settings-btn');
 
 const io = createIoSelector(document.getElementById('io-root'));
 const vu = createVuSelector(document.getElementById('vu-root'));
+const knob = createKnob(document.getElementById('knob-root'));
 const config = createConfigDialog({
   onSourcesChanged: () => io.render(),
   onOutputsChanged: () => io.render(),
   onVuVisibilityChanged: () => vu.render(),
+  onMaxVolumeChanged: () => knob.syncFromState(),
 });
-const knob = createKnob(document.getElementById('knob-root'));
 
 settingsBtn.addEventListener('click', () => {
   vu.close();

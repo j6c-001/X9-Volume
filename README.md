@@ -9,6 +9,7 @@ A tiny installable web app for Luxsin X9 volume control over your local network.
 - Main-screen **Input → Output** control — tap either side to pick from configured options
 - Flow arrow thickens and pulses with volume (quiets when muted)
 - Central volume knob (−100 dB to 0 dB line level) with stepped haptic feedback (Android Vibration API + click reinforcement; click-only where vibrate is unavailable)
+- Configurable **max volume** ceiling (default −20 dB) plus a slower “loud zone” that needs a second turn to enter
 - Mute button in the knob center
 - Tabbed settings (Device / Appearance / Sources / Outputs) with auto-save and close (X)
 - Offline-capable PWA shell (LAN required for device control)
@@ -38,7 +39,7 @@ Use your browser’s **Add to Home Screen** / **Install app** option. The app ru
 Uses the [Luxsin X9 Web API](https://am.luxsinaudio.com/ota/202607/x9/121c4/X9-API-README.md):
 
 - Polls `/msgCount`, syncs via `/dev/info.cgi?action=syncData`
-- Volume: `setting&volume=0..200` (mapped to −100..0 dB), snapped to the device `soundStep` (0.5 / 1 / 2 / 3 dB)
+- Volume: `setting&volume=0..200` (mapped to −100..0 dB), snapped to the device `soundStep` (0.5 / 1 / 2 / 3 dB). Soft max and loud-zone gearing are client-side (`localStorage` key `x9-max-volume-db`)
 - Mute: `setting&isDacMetuVolume=1`
 - Input: `setting&input=0..7`
 - Output: `setting&output=0..3` (XLR / RCA / Headphone / XLR + RCA)

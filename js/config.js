@@ -18,6 +18,13 @@ import {
   outputIconSvg,
 } from './outputs.js';
 import { getShowVuSelector, saveShowVuSelector } from './vu.js';
+import {
+  getMaxVolumeDb,
+  saveMaxVolumeDb,
+  formatVolumeDb,
+  MAX_VOLUME_SETTING_MIN,
+  MAX_VOLUME_SETTING_MAX,
+} from './volume-limit.js';
 
 const PANELS = ['device', 'appearance', 'sources', 'outputs'];
 
@@ -25,6 +32,7 @@ export function createConfigDialog({
   onSourcesChanged,
   onOutputsChanged,
   onVuVisibilityChanged,
+  onMaxVolumeChanged,
 } = {}) {
   const overlay = document.getElementById('config-overlay');
   const closeBtn = document.getElementById('config-close');
@@ -35,6 +43,8 @@ export function createConfigDialog({
   const outputsRoot = document.getElementById('config-outputs');
   const iconOnlyInput = document.getElementById('config-source-icon-only');
   const showVuInput = document.getElementById('config-show-vu');
+  const maxVolumeInput = document.getElementById('config-max-volume');
+  const maxVolumeValueEl = document.getElementById('config-max-volume-value');
   const statusEl = document.getElementById('config-status');
   const versionEl = document.getElementById('config-version');
   const tabs = [...overlay.querySelectorAll('.config-tab')];
@@ -67,6 +77,16 @@ export function createConfigDialog({
     for (const btn of swatchesRoot.querySelectorAll('.config-swatch')) {
       btn.classList.toggle('is-active', btn.dataset.color === hex);
     }
+  }
+
+  function syncMaxVolumeUi(db = getMaxVolumeDb()) {
+    const next = Math.max(
+      MAX_VOLUME_SETTING_MIN,
+      Math.min(MAX_VOLUME_SETTING_MAX, Math.round(Number(db) || 0)),
+    );
+    maxVolumeInput.value = String(next);
+    maxVolumeInput.setAttribute('aria-valuenow', String(next));
+    maxVolumeValueEl.textContent = formatVolumeDb(next);
   }
 
   function setPanel(panelId) {
@@ -263,6 +283,7 @@ export function createConfigDialog({
     syncSwatchActive(color);
     iconOnlyInput.checked = getSourceIconOnly();
     showVuInput.checked = getShowVuSelector();
+    syncMaxVolumeUi();
     renderSourcesEditor();
     renderOutputsEditor();
     setStatus(state.ip && state.connected ? 'Connected.' : '', state.connected ? 'ok' : '');
@@ -300,6 +321,12 @@ export function createConfigDialog({
   showVuInput.addEventListener('change', () => {
     saveShowVuSelector(showVuInput.checked);
     onVuVisibilityChanged?.();
+  });
+
+  maxVolumeInput.addEventListener('input', () => {
+    const next = saveMaxVolumeDb(maxVolumeInput.value);
+    syncMaxVolumeUi(next);
+    onMaxVolumeChanged?.(next);
   });
 
   input.addEventListener('keydown', (e) => {

@@ -10,9 +10,16 @@ import {
   hapticRelease,
   hapticImpact,
 } from './haptics.js';
+import {
+  getMaxVolumeDb,
+  getLoudGateDb,
+  LOUD_ZONE_GEAR,
+  VOLUME_DB_FLOOR,
+  VOLUME_DB_CEILING,
+} from './volume-limit.js';
 
-const MIN_DB = -100;
-const MAX_DB = 0;
+const MIN_DB = VOLUME_DB_FLOOR;
+const MAX_DB = VOLUME_DB_CEILING;
 const START_ANGLE = 135;
 const SWEEP = 270;
 
@@ -85,6 +92,7 @@ export function createKnob(root) {
           </filter>
         </defs>
         <path class="knob-track" d="${describeArc(CX, CY, TRACK_R, START_ANGLE, START_ANGLE + SWEEP)}" />
+        <path class="knob-headroom" id="knob-headroom" d="" />
         <path class="knob-fill" id="knob-fill" d="${describeArc(CX, CY, TRACK_R, START_ANGLE, START_ANGLE)}" />
         <g class="knob-body" id="knob-body" filter="url(#knob-shadow)">
           <circle class="knob-body-disc" cx="${CX}" cy="${CY}" r="${BODY_R}" fill="url(#knob-body-grad)" />
@@ -109,6 +117,7 @@ export function createKnob(root) {
 
   const stack = root.querySelector('#knob-stack');
   const fill = root.querySelector('#knob-fill');
+  const headroom = root.querySelector('#knob-headroom');
   const handle = root.querySelector('#knob-handle');
   const body = root.querySelector('#knob-body');
   const readout = root.querySelector('#knob-readout');
@@ -119,17 +128,93 @@ export function createKnob(root) {
   let localDb = toDb(state.volume);
   let lastSentStep = null;
   let endstopLatched = false;
+  let gateLatched = false;
+  let loudZoneAdmitted = false;
   let didDrag = false;
 
+  function softMaxDb() {
+    return getMaxVolumeDb();
+  }
+
+  function loudGateDb() {
+    return getLoudGateDb(softMaxDb());
+  }
+
+  /**
+   * 0..1 warning heat — only inside the loud zone (soft max − 12 dB → soft max).
+   * Knob colour must not tint below the gate.
+   */
+  function warningHeat(db) {
+    const max = softMaxDb();
+    const gate = loudGateDb();
+    const span = Math.max(1e-6, max - gate);
+    if (db < gate - 1e-6) return 0;
+    return Math.min(1, (db - gate) / span);
+  }
+
+  function warnColor(heat, alpha = 1) {
+    // Soft rose — stays warm, never hits neon red.
+    const t = Math.max(0, Math.min(1, heat));
+    const r = Math.round(198 + (212 - 198) * t);
+    const g = Math.round(128 + (92 - 128) * t);
+    const b = Math.round(108 + (86 - 108) * t);
+    return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+  }
+
   function render(db) {
+    const max = softMaxDb();
     const angle = dbToAngle(db);
+    const maxAngle = dbToAngle(max);
+    const gate = loudGateDb();
+    const heat = warningHeat(db);
+    const muted = state.muted;
+    const inLoudZone = !muted && heat > 0;
+
     fill.setAttribute('d', describeArc(CX, CY, TRACK_R, START_ANGLE, angle));
+
+    // Remaining usable arc only once inside the loud zone; pulse rises toward the ceiling.
+    const headroomStart = Math.min(Math.max(db, gate), max);
+    if (inLoudZone && maxAngle - dbToAngle(headroomStart) > 0.15) {
+      headroom.setAttribute(
+        'd',
+        describeArc(CX, CY, TRACK_R, dbToAngle(headroomStart), maxAngle),
+      );
+      headroom.style.visibility = 'visible';
+      headroom.style.stroke = warnColor(Math.max(0.25, heat), 0.38 + heat * 0.22);
+      stack.style.setProperty('--knob-warn-opacity-min', String(0.14 + heat * 0.16));
+      stack.style.setProperty('--knob-warn-opacity-max', String(0.3 + heat * 0.28));
+      stack.style.setProperty('--knob-warn-glow', warnColor(heat, 0.28 + heat * 0.22));
+    } else {
+      headroom.setAttribute('d', '');
+      headroom.style.visibility = 'hidden';
+      headroom.style.stroke = '';
+      stack.style.removeProperty('--knob-warn-opacity-min');
+      stack.style.removeProperty('--knob-warn-opacity-max');
+      stack.style.removeProperty('--knob-warn-glow');
+    }
+
+    // Keep the used fill (−100 dB → position) on the accent; warn via headroom + knob.
+    fill.style.stroke = '';
+    fill.style.filter = '';
+
+    if (inLoudZone) {
+      handle.style.fill = warnColor(heat * 0.7, 1);
+      handle.style.stroke = 'var(--bg)';
+      stack.style.setProperty('--knob-warn', warnColor(heat, 1));
+    } else {
+      handle.style.fill = '';
+      handle.style.stroke = '';
+      handle.style.filter = '';
+      stack.style.removeProperty('--knob-warn');
+    }
+
     const p = polar(CX, CY, TRACK_R, angle);
     handle.setAttribute('cx', p.x);
     handle.setAttribute('cy', p.y);
     body.style.transform = `rotate(${dbToKnobRotation(db)}deg)`;
     body.style.transformOrigin = `${CX}px ${CY}px`;
     readout.textContent = `${db.toFixed(1)} dB`;
+    stack.classList.toggle('is-warning', inLoudZone);
   }
 
   function flushVolume() {
@@ -141,7 +226,7 @@ export function createKnob(root) {
 
   function feedbackForStep(prevVolume, nextVolume) {
     const minVol = toVolume(MIN_DB, state.soundStep);
-    const maxVol = toVolume(MAX_DB, state.soundStep);
+    const maxVol = toVolume(softMaxDb(), state.soundStep);
     const atEnd = nextVolume <= minVol || nextVolume >= maxVol;
 
     if (atEnd) {
@@ -181,7 +266,14 @@ export function createKnob(root) {
 
   function applyDb(db) {
     if (state.muted) return;
-    localDb = Math.max(MIN_DB, Math.min(MAX_DB, db));
+    const max = softMaxDb();
+    let next = Math.max(MIN_DB, db);
+    if (next > max) {
+      // Device may already be above the soft max — don't yank it down on touch.
+      // Block further increases; allow decreases through the ceiling.
+      next = localDb > max ? Math.min(next, localDb) : max;
+    }
+    localDb = next;
     render(localDb);
     scheduleVolume(localDb);
   }
@@ -224,8 +316,13 @@ export function createKnob(root) {
     activePointerId = e.pointerId;
     lastPointerAngle = angle;
     lastSentStep = toVolume(localDb, state.soundStep);
+    const maxDb = softMaxDb();
+    const gate = loudGateDb();
+    // Already in the loud zone (or at the gate): this grab may continue upward.
+    loudZoneAdmitted = localDb >= gate - 1e-6;
+    gateLatched = false;
     endstopLatched = lastSentStep <= toVolume(MIN_DB, state.soundStep)
-      || lastSentStep >= toVolume(MAX_DB, state.soundStep);
+      || lastSentStep >= toVolume(maxDb, state.soundStep);
     stack.classList.add('is-dragging');
     setState({ dragging: true });
     hapticGrab();
@@ -244,9 +341,43 @@ export function createKnob(root) {
     // Cap per-frame jumps so a stray sample can't slam volume
     delta = Math.max(-24, Math.min(24, delta));
 
-    const dbDelta = (delta / GEAR_DEG) * (MAX_DB - MIN_DB);
-    if (Math.abs(dbDelta) > 0.001) didDrag = true;
-    applyDb(localDb + dbDelta);
+    let dbDelta = (delta / GEAR_DEG) * (MAX_DB - MIN_DB);
+    const gate = loudGateDb();
+
+    // Leaving the loud zone clears admission so re-entry needs another grab.
+    if (localDb < gate - 1e-6) {
+      loudZoneAdmitted = false;
+      gateLatched = false;
+    }
+
+    // Stiffer gearing when raising volume inside the loud zone.
+    if (dbDelta > 0 && loudZoneAdmitted && localDb >= gate - 1e-6) {
+      dbDelta /= LOUD_ZONE_GEAR;
+    }
+
+    let nextDb = localDb + dbDelta;
+
+    // Soft gate: first upward cross into the loud zone stops until re-grab.
+    if (dbDelta > 0 && !loudZoneAdmitted) {
+      if (localDb < gate && nextDb >= gate) {
+        nextDb = gate;
+        if (Math.abs(nextDb - localDb) > 0.001) didDrag = true;
+        applyDb(nextDb);
+        if (!gateLatched) {
+          gateLatched = true;
+          hapticImpact();
+        }
+        lastPointerAngle = angle;
+        return;
+      }
+      if (localDb >= gate - 1e-6) {
+        lastPointerAngle = angle;
+        return;
+      }
+    }
+
+    if (Math.abs(nextDb - localDb) > 0.001) didDrag = true;
+    applyDb(nextDb);
     lastPointerAngle = angle;
   }
 
