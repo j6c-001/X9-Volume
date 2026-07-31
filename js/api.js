@@ -5,6 +5,10 @@ export const INPUT_LABELS = [
   'Bluetooth', 'HDMI-EARC', 'RCA', 'USB Driver',
 ];
 
+export const OUTPUT_LABELS = [
+  'XLR', 'RCA', 'Headphone', 'XLR + RCA',
+];
+
 // Device soundStep 0..3 → 0.5, 1, 2, 3 dB per relay step (API volume units are 0.5 dB)
 export const VOLUME_STEP_UNITS = [1, 2, 4, 6];
 
@@ -89,6 +93,12 @@ export async function toggleMute(ip) {
 export async function setInput(ip, index) {
   const n = Math.max(0, Math.min(7, index | 0));
   const res = await deviceFetch(ip, `/dev/info.cgi?action=setting&input=${n}`);
+  return res.ok;
+}
+
+export async function setOutput(ip, index) {
+  const n = Math.max(0, Math.min(3, index | 0));
+  const res = await deviceFetch(ip, `/dev/info.cgi?action=setting&output=${n}`);
   return res.ok;
 }
 

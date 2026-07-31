@@ -30,7 +30,7 @@
     </header>
 
     <main class="main">
-      <div id="source-root" class="source-root"></div>
+      <div id="io-root" class="io-root"></div>
       <div id="knob-root"></div>
       <div id="vu-root" class="vu-root"></div>
     </main>
@@ -92,6 +92,7 @@
         <button type="button" class="config-tab is-active" role="tab" id="config-tab-device" aria-controls="config-panel-device" aria-selected="true" data-panel="device">Device</button>
         <button type="button" class="config-tab" role="tab" id="config-tab-appearance" aria-controls="config-panel-appearance" aria-selected="false" data-panel="appearance">Appearance</button>
         <button type="button" class="config-tab" role="tab" id="config-tab-sources" aria-controls="config-panel-sources" aria-selected="false" data-panel="sources">Sources</button>
+        <button type="button" class="config-tab" role="tab" id="config-tab-outputs" aria-controls="config-panel-outputs" aria-selected="false" data-panel="outputs">Outputs</button>
       </div>
 
       <div class="config-panels">
@@ -122,6 +123,11 @@
             <span>Icon only on main screen</span>
           </label>
           <div class="config-sources" id="config-sources" role="group" aria-label="Source inputs"></div>
+        </section>
+
+        <section class="config-panel" id="config-panel-outputs" role="tabpanel" aria-labelledby="config-tab-outputs" hidden>
+          <p class="config-hint">Choose which outputs appear on the main screen. Icons are destinations — headphones, amps, speakers.</p>
+          <div class="config-sources" id="config-outputs" role="group" aria-label="Output routes"></div>
         </section>
       </div>
 
