@@ -1,13 +1,14 @@
 const COLOR_KEY = 'x9-knob-color';
-const DEFAULT_COLOR = '#d2a06a';
+const DEFAULT_COLOR = '#c9a66b';
 
+/** Curated accents: clear hue separation, material finishes for dark hi-fi chrome. */
 export const KNOB_COLORS = [
-  { id: 'copper', hex: '#d2a06a', label: 'Copper' },
-  { id: 'gold', hex: '#c9b27a', label: 'Gold' },
-  { id: 'ember', hex: '#d4784a', label: 'Ember' },
-  { id: 'steel', hex: '#8fa3b5', label: 'Steel' },
-  { id: 'jade', hex: '#6a9e8b', label: 'Jade' },
-  { id: 'ivory', hex: '#d6d0c4', label: 'Ivory' },
+  { id: 'champagne', hex: '#c9a66b', label: 'Champagne' },
+  { id: 'copper', hex: '#c17a4e', label: 'Copper' },
+  { id: 'silver', hex: '#b4bec9', label: 'Silver' },
+  { id: 'azure', hex: '#5a8fd1', label: 'Azure' },
+  { id: 'oxide', hex: '#c35d4f', label: 'Oxide' },
+  { id: 'verdigris', hex: '#3f8f82', label: 'Verdigris' },
 ];
 
 function normalizeHex(value) {
@@ -20,13 +21,35 @@ function normalizeHex(value) {
   return DEFAULT_COLOR;
 }
 
-function hexToRgba(hex, alpha) {
+function hexToRgb(hex) {
   const h = normalizeHex(hex).slice(1);
   const n = parseInt(h, 16);
-  const r = (n >> 16) & 255;
-  const g = (n >> 8) & 255;
-  const b = n & 255;
+  return {
+    r: (n >> 16) & 255,
+    g: (n >> 8) & 255,
+    b: n & 255,
+  };
+}
+
+function hexToRgba(hex, alpha) {
+  const { r, g, b } = hexToRgb(hex);
   return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+}
+
+/** Relative luminance 0..1 (sRGB). Brighter accents need a softer halo. */
+function relativeLuminance(hex) {
+  const channel = (c) => {
+    const s = c / 255;
+    return s <= 0.03928 ? s / 12.92 : ((s + 0.055) / 1.055) ** 2.4;
+  };
+  const { r, g, b } = hexToRgb(hex);
+  return 0.2126 * channel(r) + 0.7152 * channel(g) + 0.0722 * channel(b);
+}
+
+function accentDimAlpha(hex) {
+  const L = relativeLuminance(hex);
+  // Keep dim fills readable without the neon-plastic bloom of a fixed 0.28.
+  return Math.max(0.14, Math.min(0.24, 0.26 - L * 0.18));
 }
 
 export function getKnobColor() {
@@ -36,8 +59,10 @@ export function getKnobColor() {
 export function applyKnobColor(hex) {
   const color = normalizeHex(hex);
   const root = document.documentElement;
+  const dim = accentDimAlpha(color);
   root.style.setProperty('--accent', color);
-  root.style.setProperty('--accent-dim', hexToRgba(color, 0.28));
+  root.style.setProperty('--accent-dim', hexToRgba(color, dim));
+  root.style.setProperty('--accent-glow', hexToRgba(color, Math.max(0.22, dim + 0.08)));
   return color;
 }
 
