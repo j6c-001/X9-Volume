@@ -1,8 +1,10 @@
-import { INPUT_LABELS, formatFirmwareVersion } from './api.js';
+import { formatFirmwareVersion } from './api.js';
 import { state, subscribe } from './state.js';
 import { startPoller } from './poller.js';
 import { createKnob } from './knob.js';
 import { createConfigDialog } from './config.js';
+import { createSourceSelector } from './source-selector.js';
+import { resolveSource } from './sources.js';
 import { applyKnobColor, getKnobColor } from './theme.js';
 
 applyKnobColor(getKnobColor());
@@ -12,7 +14,10 @@ const statusEl = document.getElementById('header-status');
 const dotEl = document.getElementById('status-dot');
 const settingsBtn = document.getElementById('settings-btn');
 
-const config = createConfigDialog();
+const sources = createSourceSelector(document.getElementById('source-root'));
+const config = createConfigDialog({
+  onSourcesChanged: () => sources.render(),
+});
 const knob = createKnob(document.getElementById('knob-root'));
 
 settingsBtn.addEventListener('click', () => config.open());
@@ -20,7 +25,7 @@ settingsBtn.addEventListener('click', () => config.open());
 function renderHeader() {
   titleEl.textContent = state.title || state.device || 'Luxsin-X9';
 
-  const inputLabel = INPUT_LABELS[state.input] || 'Unknown';
+  const inputLabel = resolveSource(state.input).label;
   const format = state.audioFormat ? ` · ${state.audioFormat}` : '';
   const firmwareVersion = formatFirmwareVersion(state.version);
   const firmware = firmwareVersion ? ` · v${firmwareVersion}` : '';
@@ -38,6 +43,7 @@ function renderHeader() {
 
 subscribe(() => {
   renderHeader();
+  sources.render();
   knob.syncFromState();
 });
 
@@ -52,3 +58,4 @@ if (!state.ip) {
 }
 
 renderHeader();
+sources.render();

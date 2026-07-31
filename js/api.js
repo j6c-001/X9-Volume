@@ -86,6 +86,12 @@ export async function toggleMute(ip) {
   return res.ok;
 }
 
+export async function setInput(ip, index) {
+  const n = Math.max(0, Math.min(7, index | 0));
+  const res = await deviceFetch(ip, `/dev/info.cgi?action=setting&input=${n}`);
+  return res.ok;
+}
+
 export function isValidIp(value) {
   const v = value.trim();
   if (!v) return false;

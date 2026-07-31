@@ -30,6 +30,7 @@
     </header>
 
     <main class="main">
+      <div id="source-root" class="source-root"></div>
       <div id="knob-root"></div>
     </main>
   </div>
@@ -37,7 +38,7 @@
   <div class="config-overlay" id="config-overlay" hidden>
     <div class="config-dialog" role="dialog" aria-labelledby="config-title" aria-modal="true">
       <h2 id="config-title">Settings</h2>
-      <p class="config-hint">Device IP on your local network, and knob accent colour.</p>
+      <p class="config-hint">Device IP, knob colour, and which input sources appear on the main screen.</p>
       <form id="config-form">
         <label class="config-field-label" for="config-ip">Device IP</label>
         <input type="text" id="config-ip" name="ip" inputmode="decimal" autocomplete="off" placeholder="192.168.1.100" required>
@@ -47,6 +48,12 @@
           <div class="config-swatches" id="config-swatches" role="group" aria-labelledby="config-color-label">
             <input type="color" id="config-color" class="config-color-custom" name="color" aria-label="Custom knob colour" value="#5eead4">
           </div>
+        </div>
+
+        <div class="config-field">
+          <span class="config-field-label" id="config-sources-label">Sources</span>
+          <p class="config-sources-hint">Enable sources to show in the selector. Custom labels replace the stock names (e.g. Optical → Wiim).</p>
+          <div class="config-sources" id="config-sources" role="group" aria-labelledby="config-sources-label"></div>
         </div>
 
         <p class="config-error" id="config-error" aria-live="polite"></p>

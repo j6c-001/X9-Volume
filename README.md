@@ -5,9 +5,11 @@ A tiny installable web app for Luxsin X9 volume control over your local network.
 ## Features
 
 - Device status and title at the top
+- Configurable input sources (enable, custom label, built-in icon)
+- Main-screen source selector that switches the X9 input
 - Central volume knob (−100 dB to 0 dB line level)
 - Mute button in the knob center
-- IP configuration dialog
+- IP / theme / sources settings dialog
 - Offline-capable PWA shell (LAN required for device control)
 
 ## Setup
@@ -35,8 +37,9 @@ Uses the [Luxsin X9 Web API](https://am.luxsinaudio.com/ota/202607/x9/121c4/X9-A
 - Polls `/msgCount`, syncs via `/dev/info.cgi?action=syncData`
 - Volume: `setting&volume=0..200` (mapped to −100..0 dB), snapped to the device `soundStep` (0.5 / 1 / 2 / 3 dB)
 - Mute: `setting&isDacMetuVolume=1`
+- Input: `setting&input=0..7`
 
-Input source labels match the official Luxsin X9 UI (`RCA`, `HDMI-EARC`, `USB Driver`, etc.).
+Stock input labels match the official Luxsin X9 UI (`RCA`, `HDMI-EARC`, `USB Driver`, etc.). In Settings you can hide unused inputs and override labels/icons (stored in `localStorage` as `x9-sources`).
 
 ## Files
 

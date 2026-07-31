@@ -119,9 +119,88 @@ body {
 .main {
   flex: 1;
   display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  min-height: 0;
+}
+
+.source-root {
+  width: 100%;
+  max-width: min(92vw, 460px);
+  flex-shrink: 0;
+}
+
+#knob-root {
+  flex: 1;
+  display: flex;
   align-items: center;
   justify-content: center;
   min-height: 0;
+  width: 100%;
+}
+
+.source-strip {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding: 2px 2px 6px;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+}
+
+.source-chip {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  min-width: 64px;
+  padding: 8px 10px;
+  border: 1px solid #2a2a35;
+  border-radius: 12px;
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+  flex-shrink: 0;
+  -webkit-tap-highlight-color: transparent;
+  transition: color 0.15s ease, border-color 0.15s ease, background 0.15s ease;
+}
+
+.source-chip:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+
+.source-chip:not(:disabled):active {
+  transform: scale(0.96);
+}
+
+.source-chip.is-active {
+  color: var(--accent);
+  border-color: var(--accent);
+  background: var(--accent-dim);
+}
+
+.source-chip .source-icon {
+  display: block;
+  fill: currentColor;
+  flex-shrink: 0;
+}
+
+.source-chip .source-icon [stroke] {
+  fill: none;
+}
+
+.source-chip-label {
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  white-space: nowrap;
+  max-width: 72px;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .knob-stack {
@@ -320,11 +399,14 @@ body {
 }
 
 .config-dialog {
-  width: min(100%, 360px);
+  width: min(100%, 400px);
+  max-height: min(90dvh, 720px);
+  overflow-y: auto;
   background: var(--surface);
   border: 1px solid #2a2a35;
   border-radius: 16px;
   padding: 24px;
+  -webkit-overflow-scrolling: touch;
 }
 
 .config-dialog h2 {
@@ -370,6 +452,99 @@ body {
 
 .config-field {
   margin-top: 18px;
+}
+
+.config-sources-hint {
+  margin: -2px 0 10px;
+  font-size: 0.75rem;
+  color: var(--muted);
+  line-height: 1.35;
+}
+
+.config-sources {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.config-source-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 8px;
+  padding: 10px;
+  border: 1px solid #2a2a35;
+  border-radius: 12px;
+  background: var(--bg);
+}
+
+.config-source-row.is-disabled {
+  opacity: 0.55;
+}
+
+.config-source-enable {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  min-width: 0;
+}
+
+.config-source-enable input {
+  width: 16px;
+  height: 16px;
+  accent-color: var(--accent);
+  flex-shrink: 0;
+}
+
+.config-source-stock {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.config-dialog .config-source-label {
+  width: 100%;
+  margin-top: 0;
+  padding: 8px 10px;
+  font-size: 0.875rem;
+}
+
+.config-source-icons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.config-source-icon-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  padding: 0;
+  border: 1px solid #2a2a35;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.config-source-icon-btn .source-icon {
+  fill: currentColor;
+}
+
+.config-source-icon-btn .source-icon [stroke] {
+  fill: none;
+}
+
+.config-source-icon-btn.is-active {
+  color: var(--accent);
+  border-color: var(--accent);
+  background: var(--accent-dim);
 }
 
 .config-swatches {
