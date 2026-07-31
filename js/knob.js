@@ -148,17 +148,17 @@ export function createKnob(root) {
     const pre = 10;
     if (db <= gate - pre) return 0;
     if (db <= gate) {
-      return 0.28 * ((db - (gate - pre)) / pre);
+      return 0.2 * ((db - (gate - pre)) / pre);
     }
-    return Math.min(1, 0.28 + 0.72 * ((db - gate) / span));
+    return Math.min(1, 0.2 + 0.55 * ((db - gate) / span));
   }
 
   function warnColor(heat, alpha = 1) {
-    // Accent-warm → hot red as heat rises.
+    // Soft rose — stays warm, never hits neon red.
     const t = Math.max(0, Math.min(1, heat));
-    const r = Math.round(210 + (228 - 210) * t);
-    const g = Math.round(160 + (52 - 160) * t);
-    const b = Math.round(106 + (48 - 106) * t);
+    const r = Math.round(198 + (212 - 198) * t);
+    const g = Math.round(128 + (92 - 128) * t);
+    const b = Math.round(108 + (86 - 108) * t);
     return `rgba(${r}, ${g}, ${b}, ${alpha})`;
   }
 
@@ -168,39 +168,39 @@ export function createKnob(root) {
     const maxAngle = dbToAngle(max);
     const heat = warningHeat(db);
     const muted = state.muted;
+    const warning = !muted && heat > 0.02;
 
     fill.setAttribute('d', describeArc(CX, CY, TRACK_R, START_ANGLE, angle));
 
-    // Remaining usable arc (current → soft max) glows hotter as headroom shrinks.
+    // Remaining usable arc (current → soft max); pulse strength rises as headroom shrinks.
     const headroomStart = Math.min(db, max);
-    if (!muted && heat > 0.01 && maxAngle - dbToAngle(headroomStart) > 0.15) {
+    if (warning && maxAngle - dbToAngle(headroomStart) > 0.15) {
       headroom.setAttribute(
         'd',
         describeArc(CX, CY, TRACK_R, dbToAngle(headroomStart), maxAngle),
       );
-      const opacity = 0.2 + heat * 0.72;
-      const blur = 6 + heat * 16;
-      headroom.style.opacity = String(opacity);
-      headroom.style.stroke = warnColor(Math.max(0.35, heat), 0.55 + heat * 0.4);
-      headroom.style.filter = `drop-shadow(0 0 ${blur}px ${warnColor(heat, 0.35 + heat * 0.55)})`;
       headroom.style.visibility = 'visible';
+      headroom.style.stroke = warnColor(Math.max(0.25, heat), 0.38 + heat * 0.22);
+      stack.style.setProperty('--knob-warn-opacity-min', String(0.14 + heat * 0.16));
+      stack.style.setProperty('--knob-warn-opacity-max', String(0.3 + heat * 0.28));
+      stack.style.setProperty('--knob-warn-glow', warnColor(heat, 0.28 + heat * 0.22));
     } else {
       headroom.setAttribute('d', '');
       headroom.style.visibility = 'hidden';
-      headroom.style.filter = 'none';
+      headroom.style.stroke = '';
+      stack.style.removeProperty('--knob-warn-opacity-min');
+      stack.style.removeProperty('--knob-warn-opacity-max');
+      stack.style.removeProperty('--knob-warn-glow');
     }
 
     // Keep the used fill (−100 dB → position) on the accent; warn via headroom + knob.
     fill.style.stroke = '';
     fill.style.filter = '';
 
-    if (!muted && heat > 0.02) {
-      const stroke = warnColor(heat, 1);
-      const glow = warnColor(heat, 0.22 + heat * 0.45);
-      handle.style.fill = stroke;
+    if (warning) {
+      handle.style.fill = warnColor(heat * 0.7, 1);
       handle.style.stroke = 'var(--bg)';
-      handle.style.filter = `drop-shadow(0 0 ${4 + heat * 12}px ${glow})`;
-      stack.style.setProperty('--knob-warn', stroke);
+      stack.style.setProperty('--knob-warn', warnColor(heat, 1));
     } else {
       handle.style.fill = '';
       handle.style.stroke = '';
@@ -214,7 +214,7 @@ export function createKnob(root) {
     body.style.transform = `rotate(${dbToKnobRotation(db)}deg)`;
     body.style.transformOrigin = `${CX}px ${CY}px`;
     readout.textContent = `${db.toFixed(1)} dB`;
-    stack.classList.toggle('is-warning', !muted && heat > 0.35);
+    stack.classList.toggle('is-warning', warning);
   }
 
   function flushVolume() {

@@ -724,13 +724,52 @@ body {
   filter: none;
 }
 
+.knob-stack.is-warning .knob-headroom {
+  animation: knob-warn-pulse 2.2s ease-in-out infinite;
+  filter: drop-shadow(0 0 8px var(--knob-warn-glow, rgba(200, 100, 88, 0.3)));
+}
+
+.knob-stack.is-warning .knob-handle {
+  animation: knob-warn-handle-pulse 2.2s ease-in-out infinite;
+}
+
 .knob-stack.is-warning .knob-indicator {
   stroke: var(--knob-warn, var(--accent));
-  filter: drop-shadow(0 0 6px var(--knob-warn, var(--accent-dim)));
+  animation: knob-warn-handle-pulse 2.2s ease-in-out infinite;
 }
 
 .knob-stack.is-muted .knob-body {
   opacity: 0.4;
+}
+
+@keyframes knob-warn-pulse {
+  0%, 100% {
+    opacity: var(--knob-warn-opacity-min, 0.18);
+  }
+  50% {
+    opacity: var(--knob-warn-opacity-max, 0.4);
+  }
+}
+
+@keyframes knob-warn-handle-pulse {
+  0%, 100% {
+    filter: drop-shadow(0 0 3px var(--knob-warn-glow, rgba(200, 100, 88, 0.25)));
+  }
+  50% {
+    filter: drop-shadow(0 0 9px var(--knob-warn-glow, rgba(200, 100, 88, 0.4)));
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .knob-stack.is-warning .knob-headroom,
+  .knob-stack.is-warning .knob-handle,
+  .knob-stack.is-warning .knob-indicator {
+    animation: none;
+  }
+
+  .knob-stack.is-warning .knob-headroom {
+    opacity: var(--knob-warn-opacity-max, 0.35);
+  }
 }
 
 .knob-stack.is-muted {
@@ -757,11 +796,10 @@ body {
 
 .knob-headroom {
   fill: none;
-  stroke: rgba(220, 64, 48, 0.45);
+  stroke: rgba(200, 110, 95, 0.32);
   stroke-width: 22;
   stroke-linecap: round;
   pointer-events: none;
-  transition: opacity 80ms linear;
 }
 
 .knob-fill {
