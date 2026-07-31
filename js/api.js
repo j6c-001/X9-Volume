@@ -92,6 +92,12 @@ export async function setInput(ip, index) {
   return res.ok;
 }
 
+export async function setVu(ip, index) {
+  const n = Math.max(0, Math.min(15, index | 0));
+  const res = await deviceFetch(ip, `/dev/info.cgi?action=setting&vu=${n}`);
+  return res.ok;
+}
+
 export function isValidIp(value) {
   const v = value.trim();
   if (!v) return false;

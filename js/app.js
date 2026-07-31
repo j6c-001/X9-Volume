@@ -4,6 +4,7 @@ import { startPoller } from './poller.js';
 import { createKnob } from './knob.js';
 import { createConfigDialog } from './config.js';
 import { createSourceSelector } from './source-selector.js';
+import { createVuSelector } from './vu.js';
 import { resolveSource } from './sources.js';
 import { applyKnobColor, getKnobColor } from './theme.js';
 import { registerServiceWorker } from './update.js';
@@ -16,12 +17,17 @@ const dotEl = document.getElementById('status-dot');
 const settingsBtn = document.getElementById('settings-btn');
 
 const sources = createSourceSelector(document.getElementById('source-root'));
+const vu = createVuSelector(document.getElementById('vu-root'));
 const config = createConfigDialog({
   onSourcesChanged: () => sources.render(),
+  onVuVisibilityChanged: () => vu.render(),
 });
 const knob = createKnob(document.getElementById('knob-root'));
 
-settingsBtn.addEventListener('click', () => config.open());
+settingsBtn.addEventListener('click', () => {
+  vu.close();
+  config.open();
+});
 
 function renderHeader() {
   titleEl.textContent = state.title || state.device || 'Luxsin-X9';
@@ -45,6 +51,7 @@ function renderHeader() {
 subscribe(() => {
   renderHeader();
   sources.render();
+  vu.render();
   knob.syncFromState();
 });
 
@@ -58,3 +65,4 @@ if (!state.ip) {
 
 renderHeader();
 sources.render();
+vu.render();

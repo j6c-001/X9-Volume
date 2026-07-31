@@ -11,10 +11,11 @@ import {
   saveSourceIconOnly,
   sourceIconSvg,
 } from './sources.js';
+import { getShowVuSelector, saveShowVuSelector } from './vu.js';
 
 const PANELS = ['device', 'appearance', 'sources'];
 
-export function createConfigDialog({ onSourcesChanged } = {}) {
+export function createConfigDialog({ onSourcesChanged, onVuVisibilityChanged } = {}) {
   const overlay = document.getElementById('config-overlay');
   const closeBtn = document.getElementById('config-close');
   const input = document.getElementById('config-ip');
@@ -22,6 +23,7 @@ export function createConfigDialog({ onSourcesChanged } = {}) {
   const swatchesRoot = document.getElementById('config-swatches');
   const sourcesRoot = document.getElementById('config-sources');
   const iconOnlyInput = document.getElementById('config-source-icon-only');
+  const showVuInput = document.getElementById('config-show-vu');
   const statusEl = document.getElementById('config-status');
   const versionEl = document.getElementById('config-version');
   const tabs = [...overlay.querySelectorAll('.config-tab')];
@@ -185,6 +187,9 @@ export function createConfigDialog({ onSourcesChanged } = {}) {
         volume: data.volume ?? 100,
         soundStep: data.soundStep ?? 0,
         muted: !!data.isDacMetuVolume,
+        vu: data.vu != null ? Math.max(0, data.vu | 0) : 0,
+        vuCount: data.vu_count != null ? Math.max(1, data.vu_count | 0) : 16,
+        selectingVu: false,
       });
       resetPoller();
       setStatus('Connected.', 'ok');
@@ -204,6 +209,7 @@ export function createConfigDialog({ onSourcesChanged } = {}) {
     applyKnobColor(color);
     syncSwatchActive(color);
     iconOnlyInput.checked = getSourceIconOnly();
+    showVuInput.checked = getShowVuSelector();
     renderSourcesEditor();
     setStatus(state.ip && state.connected ? 'Connected.' : '', state.connected ? 'ok' : '');
     setPanel(state.ip ? panel : 'device');
@@ -234,6 +240,11 @@ export function createConfigDialog({ onSourcesChanged } = {}) {
   iconOnlyInput.addEventListener('change', () => {
     saveSourceIconOnly(iconOnlyInput.checked);
     onSourcesChanged?.();
+  });
+
+  showVuInput.addEventListener('change', () => {
+    saveShowVuSelector(showVuInput.checked);
+    onVuVisibilityChanged?.();
   });
 
   input.addEventListener('keydown', (e) => {
