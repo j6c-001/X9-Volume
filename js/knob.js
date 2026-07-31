@@ -11,13 +11,6 @@ function dbToAngle(db) {
   return START_ANGLE + t * SWEEP;
 }
 
-function angleToDb(angle) {
-  let a = angle;
-  while (a < START_ANGLE) a += 360;
-  const t = Math.max(0, Math.min(1, (a - START_ANGLE) / SWEEP));
-  return MIN_DB + t * (MAX_DB - MIN_DB);
-}
-
 function polar(cx, cy, r, deg) {
   const rad = (deg * Math.PI) / 180;
   return {
@@ -107,26 +100,59 @@ export function createKnob(root) {
     return (Math.atan2(y, x) * 180) / Math.PI;
   }
 
-  let dragging = false;
+  const DRAG_THRESHOLD = 8;
+  let pointerDown = false;
+  let dragActive = false;
+  let startX = 0;
+  let startY = 0;
+  let lastPointerAngle = null;
 
   function onPointerDown(e) {
     if (!state.connected || state.poweredOff) return;
-    dragging = true;
-    setState({ dragging: true });
+    if (e.target.closest('#knob-mute')) return;
+
+    pointerDown = true;
+    dragActive = false;
+    startX = e.clientX;
+    startY = e.clientY;
+    lastPointerAngle = null;
     wrap.setPointerCapture(e.pointerId);
-    applyDb(angleToDb(pointerAngle(e.clientX, e.clientY)));
   }
 
   function onPointerMove(e) {
-    if (!dragging) return;
-    applyDb(angleToDb(pointerAngle(e.clientX, e.clientY)));
+    if (!pointerDown) return;
+
+    const angle = pointerAngle(e.clientX, e.clientY);
+
+    if (!dragActive) {
+      const dist = Math.hypot(e.clientX - startX, e.clientY - startY);
+      if (dist < DRAG_THRESHOLD) return;
+      dragActive = true;
+      setState({ dragging: true });
+      lastPointerAngle = angle;
+      return;
+    }
+
+    let delta = angle - lastPointerAngle;
+    if (delta > 180) delta -= 360;
+    if (delta < -180) delta += 360;
+
+    const dbDelta = (delta / SWEEP) * (MAX_DB - MIN_DB);
+    applyDb(localDb + dbDelta);
+    lastPointerAngle = angle;
   }
 
   function onPointerUp(e) {
-    if (!dragging) return;
-    dragging = false;
-    setState({ dragging: false });
-    flushVolume();
+    if (!pointerDown) return;
+    pointerDown = false;
+
+    if (dragActive) {
+      flushVolume();
+      setState({ dragging: false });
+    }
+
+    dragActive = false;
+    lastPointerAngle = null;
     try { wrap.releasePointerCapture(e.pointerId); } catch (_) {}
   }
 
