@@ -708,6 +708,11 @@ body {
   filter: none;
 }
 
+.knob-stack.is-muted .knob-headroom {
+  visibility: hidden;
+  filter: none;
+}
+
 .knob-stack.is-muted .knob-handle {
   fill: #555;
   stroke: #555;
@@ -717,6 +722,15 @@ body {
 .knob-stack.is-muted .knob-indicator {
   stroke: #555;
   filter: none;
+}
+
+.knob-stack.is-warning .knob-indicator {
+  stroke: var(--knob-warn, var(--accent));
+  filter: drop-shadow(0 0 6px var(--knob-warn, var(--accent-dim)));
+}
+
+.knob-stack.is-warning .knob-readout {
+  color: var(--knob-warn, var(--text));
 }
 
 .knob-stack.is-muted .knob-body {
@@ -745,12 +759,22 @@ body {
   stroke-linecap: round;
 }
 
+.knob-headroom {
+  fill: none;
+  stroke: rgba(220, 64, 48, 0.45);
+  stroke-width: 22;
+  stroke-linecap: round;
+  pointer-events: none;
+  transition: opacity 80ms linear;
+}
+
 .knob-fill {
   fill: none;
   stroke: var(--accent);
   stroke-width: 22;
   stroke-linecap: round;
   filter: drop-shadow(0 0 10px var(--accent-dim));
+  transition: stroke 80ms linear;
 }
 
 .knob-body {

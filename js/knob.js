@@ -92,6 +92,7 @@ export function createKnob(root) {
           </filter>
         </defs>
         <path class="knob-track" d="${describeArc(CX, CY, TRACK_R, START_ANGLE, START_ANGLE + SWEEP)}" />
+        <path class="knob-headroom" id="knob-headroom" d="" />
         <path class="knob-fill" id="knob-fill" d="${describeArc(CX, CY, TRACK_R, START_ANGLE, START_ANGLE)}" />
         <g class="knob-body" id="knob-body" filter="url(#knob-shadow)">
           <circle class="knob-body-disc" cx="${CX}" cy="${CY}" r="${BODY_R}" fill="url(#knob-body-grad)" />
@@ -116,6 +117,7 @@ export function createKnob(root) {
 
   const stack = root.querySelector('#knob-stack');
   const fill = root.querySelector('#knob-fill');
+  const headroom = root.querySelector('#knob-headroom');
   const handle = root.querySelector('#knob-handle');
   const body = root.querySelector('#knob-body');
   const readout = root.querySelector('#knob-readout');
@@ -138,15 +140,81 @@ export function createKnob(root) {
     return getLoudGateDb(softMaxDb());
   }
 
+  /** 0..1 warning heat — rises through the approach into the loud zone, peaks at soft max. */
+  function warningHeat(db) {
+    const max = softMaxDb();
+    const gate = loudGateDb();
+    const span = Math.max(1e-6, max - gate);
+    const pre = 10;
+    if (db <= gate - pre) return 0;
+    if (db <= gate) {
+      return 0.28 * ((db - (gate - pre)) / pre);
+    }
+    return Math.min(1, 0.28 + 0.72 * ((db - gate) / span));
+  }
+
+  function warnColor(heat, alpha = 1) {
+    // Accent-warm → hot red as heat rises.
+    const t = Math.max(0, Math.min(1, heat));
+    const r = Math.round(210 + (228 - 210) * t);
+    const g = Math.round(160 + (52 - 160) * t);
+    const b = Math.round(106 + (48 - 106) * t);
+    return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+  }
+
   function render(db) {
+    const max = softMaxDb();
     const angle = dbToAngle(db);
+    const maxAngle = dbToAngle(max);
+    const heat = warningHeat(db);
+    const muted = state.muted;
+
     fill.setAttribute('d', describeArc(CX, CY, TRACK_R, START_ANGLE, angle));
+
+    // Remaining usable arc (current → soft max) glows hotter as headroom shrinks.
+    const headroomStart = Math.min(db, max);
+    if (!muted && heat > 0.01 && maxAngle - dbToAngle(headroomStart) > 0.15) {
+      headroom.setAttribute(
+        'd',
+        describeArc(CX, CY, TRACK_R, dbToAngle(headroomStart), maxAngle),
+      );
+      const opacity = 0.2 + heat * 0.72;
+      const blur = 6 + heat * 16;
+      headroom.style.opacity = String(opacity);
+      headroom.style.stroke = warnColor(Math.max(0.35, heat), 0.55 + heat * 0.4);
+      headroom.style.filter = `drop-shadow(0 0 ${blur}px ${warnColor(heat, 0.35 + heat * 0.55)})`;
+      headroom.style.visibility = 'visible';
+    } else {
+      headroom.setAttribute('d', '');
+      headroom.style.visibility = 'hidden';
+      headroom.style.filter = 'none';
+    }
+
+    if (!muted && heat > 0.02) {
+      const stroke = warnColor(heat, 1);
+      const glow = warnColor(heat, 0.22 + heat * 0.45);
+      fill.style.stroke = stroke;
+      fill.style.filter = `drop-shadow(0 0 ${8 + heat * 10}px ${glow})`;
+      handle.style.fill = stroke;
+      handle.style.stroke = 'var(--bg)';
+      handle.style.filter = `drop-shadow(0 0 ${4 + heat * 10}px ${glow})`;
+      stack.style.setProperty('--knob-warn', stroke);
+    } else {
+      fill.style.stroke = '';
+      fill.style.filter = '';
+      handle.style.fill = '';
+      handle.style.stroke = '';
+      handle.style.filter = '';
+      stack.style.removeProperty('--knob-warn');
+    }
+
     const p = polar(CX, CY, TRACK_R, angle);
     handle.setAttribute('cx', p.x);
     handle.setAttribute('cy', p.y);
     body.style.transform = `rotate(${dbToKnobRotation(db)}deg)`;
     body.style.transformOrigin = `${CX}px ${CY}px`;
     readout.textContent = `${db.toFixed(1)} dB`;
+    stack.classList.toggle('is-warning', !muted && heat > 0.35);
   }
 
   function flushVolume() {
