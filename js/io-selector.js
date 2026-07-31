@@ -12,6 +12,7 @@ import {
   getOutputConfig,
   visibleOutputs,
   resolveOutput,
+  outputIconSvg,
 } from './outputs.js';
 
 export function createIoSelector(root) {
@@ -134,9 +135,10 @@ export function createIoSelector(root) {
       if (!state.connected) btn.disabled = true;
 
       const iconSize = iconOnly ? 22 : 18;
+      const iconSvg = side === 'input' ? sourceIconSvg : outputIconSvg;
       btn.innerHTML = iconOnly
-        ? sourceIconSvg(option.icon, iconSize)
-        : `${sourceIconSvg(option.icon, iconSize)}<span class="source-chip-label">${escapeHtml(option.label)}</span>`;
+        ? iconSvg(option.icon, iconSize)
+        : `${iconSvg(option.icon, iconSize)}<span class="source-chip-label">${escapeHtml(option.label)}</span>`;
       btn.addEventListener('click', () => onSelect(option.index));
       pickerStrip.appendChild(btn);
     }
@@ -184,7 +186,7 @@ export function createIoSelector(root) {
     flow.classList.toggle('is-icon-only', iconOnly);
 
     inputIcon.innerHTML = sourceIconSvg(source.icon, iconSize);
-    outputIcon.innerHTML = sourceIconSvg(output.icon, iconSize);
+    outputIcon.innerHTML = outputIconSvg(output.icon, iconSize);
 
     inputLabel.hidden = iconOnly;
     outputLabel.hidden = iconOnly;

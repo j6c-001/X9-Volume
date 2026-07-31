@@ -43,7 +43,7 @@ Uses the [Luxsin X9 Web API](https://am.luxsinaudio.com/ota/202607/x9/121c4/X9-A
 - Input: `setting&input=0..7`
 - Output: `setting&output=0..3` (XLR / RCA / Headphone / XLR + RCA)
 
-Stock input labels match the official Luxsin X9 UI (`RCA`, `HDMI-EARC`, `USB Driver`, etc.). In Settings you can hide unused inputs/outputs and override labels/icons — device icons (TV, streamer, turntable, DAC, headphones, …) plus connection icons (USB, optical, HDMI, XLR, …), stored in `localStorage` as `x9-sources` / `x9-outputs`. Enable **Icon only on main screen** (`x9-source-icon-only`) to hide endpoint labels and show icons alone.
+Stock input labels match the official Luxsin X9 UI (`RCA`, `HDMI-EARC`, `USB Driver`, etc.). In Settings you can hide unused inputs/outputs and override labels/icons. Sources use device/connection icons (TV, streamer, turntable, DAC, USB, …); outputs use a separate set (headphones, earbuds, IEMs, amp, speakers, …), stored in `localStorage` as `x9-sources` / `x9-outputs`. Enable **Icon only on main screen** (`x9-source-icon-only`) to hide endpoint labels and show icons alone.
 
 ## Files
 

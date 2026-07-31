@@ -12,8 +12,10 @@ import {
   sourceIconSvg,
 } from './sources.js';
 import {
+  OUTPUT_ICONS,
   getOutputConfig,
   saveOutputConfig,
+  outputIconSvg,
 } from './outputs.js';
 import { getShowVuSelector, saveShowVuSelector } from './vu.js';
 
@@ -96,6 +98,8 @@ export function createConfigDialog({
     keyPrefix,
     onPersist,
     getConfig,
+    icons,
+    iconSvg,
   }) {
     root.replaceChildren();
     for (const entry of entries) {
@@ -145,14 +149,14 @@ export function createConfigDialog({
         onPersist(next);
       });
 
-      for (const icon of SOURCE_ICONS) {
+      for (const icon of icons) {
         const btn = document.createElement('button');
         btn.type = 'button';
         btn.className = 'config-source-icon-btn';
         btn.title = icon.label;
         btn.setAttribute('aria-label', icon.label);
         btn.dataset.icon = icon.id;
-        btn.innerHTML = sourceIconSvg(icon.id, 16);
+        btn.innerHTML = iconSvg(icon.id, 16);
         if (entry.icon === icon.id) btn.classList.add('is-active');
         btn.addEventListener('click', () => {
           const next = getConfig();
@@ -177,6 +181,8 @@ export function createConfigDialog({
       keyPrefix: 'source',
       onPersist: persistSources,
       getConfig: getSourceConfig,
+      icons: SOURCE_ICONS,
+      iconSvg: sourceIconSvg,
     });
   }
 
@@ -188,6 +194,8 @@ export function createConfigDialog({
       keyPrefix: 'output',
       onPersist: persistOutputs,
       getConfig: getOutputConfig,
+      icons: OUTPUT_ICONS,
+      iconSvg: outputIconSvg,
     });
   }
 
