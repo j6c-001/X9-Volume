@@ -1,4 +1,4 @@
-const CACHE = 'x9-volume-v4';
+const CACHE = 'x9-volume-v5';
 
 function asset(path) {
   return new URL(path, self.location).href;

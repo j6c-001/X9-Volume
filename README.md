@@ -39,7 +39,7 @@ Uses the [Luxsin X9 Web API](https://am.luxsinaudio.com/ota/202607/x9/121c4/X9-A
 - Mute: `setting&isDacMetuVolume=1`
 - Input: `setting&input=0..7`
 
-Stock input labels match the official Luxsin X9 UI (`RCA`, `HDMI-EARC`, `USB Driver`, etc.). In Settings you can hide unused inputs and override labels/icons (stored in `localStorage` as `x9-sources`).
+Stock input labels match the official Luxsin X9 UI (`RCA`, `HDMI-EARC`, `USB Driver`, etc.). In Settings you can hide unused inputs and override labels/icons — device icons (TV, streamer, turntable, DAC, …) plus connection icons (USB, optical, HDMI, …), stored in `localStorage` as `x9-sources`.
 
 ## Files
 
