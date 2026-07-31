@@ -7,7 +7,7 @@ A tiny installable web app for Luxsin X9 volume control over your local network.
 - Device status and title at the top
 - Configurable input sources (enable, custom label, built-in icon)
 - Main-screen source selector that switches the X9 input
-- Central volume knob (−100 dB to 0 dB line level) with stepped haptic / click feedback
+- Central volume knob (−100 dB to 0 dB line level) with stepped haptic feedback (Android Vibration API + click reinforcement; click-only where vibrate is unavailable)
 - Mute button in the knob center
 - Tabbed settings (Device / Appearance / Sources) with auto-save and close (X)
 - Offline-capable PWA shell (LAN required for device control)
