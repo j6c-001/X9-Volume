@@ -93,9 +93,9 @@ export function createKnob(root) {
   }
 
   function applyDb(db) {
-    localDb = Math.max(MIN_DB, Math.min(MAX_DB, db));
+    const volume = toVolume(db, state.soundStep);
+    localDb = toDb(volume);
     render(localDb);
-    const volume = toVolume(localDb);
     setState({ volume });
     scheduleVolume(volume);
   }

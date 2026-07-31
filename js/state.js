@@ -9,6 +9,7 @@ export const state = {
   input: 0,
   audioFormat: '',
   volume: 100,
+  soundStep: 0,
   muted: false,
   dragging: false,
   togglingMute: false,
@@ -47,6 +48,7 @@ export function mergeFromServer(data) {
     input: data.input ?? state.input,
     audioFormat: data.audioFormat || '',
     volume: data.volume ?? state.volume,
+    soundStep: data.soundStep ?? state.soundStep,
     muted: !!data.isDacMetuVolume,
     msgCount: data.msgCount ?? state.msgCount,
   });

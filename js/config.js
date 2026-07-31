@@ -53,6 +53,7 @@ export function createConfigDialog() {
         input: data.input ?? 0,
         audioFormat: data.audioFormat || '',
         volume: data.volume ?? 100,
+        soundStep: data.soundStep ?? 0,
         muted: !!data.isDacMetuVolume,
       });
       resetPoller();

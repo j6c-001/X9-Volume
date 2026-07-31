@@ -5,12 +5,27 @@ export const INPUT_LABELS = [
   'Bluetooth', 'HDMI eARC', 'Audio-in', 'Local',
 ];
 
+// Device soundStep 0..3 → 0.5, 1, 2, 3 dB per relay step (API volume units are 0.5 dB)
+export const VOLUME_STEP_UNITS = [1, 2, 4, 6];
+
+export function getVolumeStepUnits(soundStep) {
+  const idx = Math.max(0, Math.min(3, soundStep | 0));
+  return VOLUME_STEP_UNITS[idx];
+}
+
+export function snapVolume(volume, soundStep) {
+  const step = getVolumeStepUnits(soundStep);
+  const clamped = Math.max(0, Math.min(200, volume));
+  return Math.round(clamped / step) * step;
+}
+
 export function toDb(volume) {
   return volume / 2 - 100;
 }
 
-export function toVolume(db) {
-  return Math.max(0, Math.min(200, Math.round((db + 100) * 2)));
+export function toVolume(db, soundStep = 0) {
+  const raw = Math.round((db + 100) * 2);
+  return snapVolume(raw, soundStep);
 }
 
 function base(ip) {
