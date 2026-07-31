@@ -1,4 +1,4 @@
-import { getMsgCount, syncData } from './api.js';
+import { getMsgCount, syncData, canReachDevice } from './api.js';
 import { state, setState, mergeFromServer } from './state.js';
 
 let timer = null;
@@ -8,7 +8,7 @@ let abortController = null;
 async function tick() {
   const interval = 400;
 
-  if (document.hidden || !state.ip) {
+  if (document.hidden || !state.ip || !canReachDevice()) {
     timer = setTimeout(tick, interval);
     return;
   }

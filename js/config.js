@@ -1,4 +1,4 @@
-import { getId, syncData, isValidIp } from './api.js';
+import { getId, syncData, isValidIp, canReachDevice } from './api.js';
 import { state, setState } from './state.js';
 import { resetPoller } from './poller.js';
 
@@ -32,6 +32,11 @@ export function createConfigDialog() {
     const ip = input.value.trim();
     if (!isValidIp(ip)) {
       error.textContent = 'Enter a valid IP address or hostname.';
+      return;
+    }
+
+    if (!canReachDevice()) {
+      error.textContent = 'Device control requires opening this app over HTTP on your LAN. HTTPS pages cannot reach the X9 API.';
       return;
     }
 

@@ -1,4 +1,4 @@
-import { INPUT_LABELS, formatFirmwareVersion } from './api.js';
+import { INPUT_LABELS, formatFirmwareVersion, canReachDevice } from './api.js';
 import { state, setState, subscribe } from './state.js';
 import { startPoller } from './poller.js';
 import { createKnob } from './knob.js';
@@ -23,7 +23,9 @@ function renderHeader() {
   const firmware = firmwareVersion ? ` · v${firmwareVersion}` : '';
   let statusText = `${inputLabel}${format}${firmware}`;
 
-  if (!state.connected) {
+  if (!canReachDevice()) {
+    statusText = 'Open over HTTP on your LAN — HTTPS blocks device access';
+  } else if (!state.connected) {
     statusText = state.ip ? 'Unreachable' : 'No device configured';
   }
 
@@ -39,12 +41,12 @@ subscribe(() => {
 });
 
 if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('/sw.js').catch(() => {});
+  navigator.serviceWorker.register(new URL('../sw.js', import.meta.url)).catch(() => {});
 }
 
 if (!state.ip) {
   config.open();
-} else {
+} else if (canReachDevice()) {
   startPoller();
 }
 

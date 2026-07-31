@@ -93,3 +93,7 @@ export function isValidIp(value) {
   }
   return host.test(v);
 }
+
+export function canReachDevice() {
+  return location.protocol === 'http:';
+}
