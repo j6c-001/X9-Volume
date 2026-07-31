@@ -408,14 +408,23 @@ body {
 }
 
 .config-dialog {
+  display: flex;
+  flex-direction: column;
   width: min(100%, 400px);
   max-height: min(90dvh, 720px);
-  overflow-y: auto;
   background: var(--surface);
   border: 1px solid #2a2a35;
   border-radius: 16px;
-  padding: 24px;
-  -webkit-overflow-scrolling: touch;
+  padding: 20px 20px 16px;
+  overflow: hidden;
+}
+
+.config-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-shrink: 0;
 }
 
 .config-dialog h2 {
@@ -423,9 +432,71 @@ body {
   font-weight: 600;
 }
 
+.config-close {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  margin: -6px -6px -6px 0;
+  border: none;
+  border-radius: 10px;
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+  flex-shrink: 0;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.config-close:active {
+  background: var(--bg);
+  color: var(--text);
+}
+
+.config-tabs {
+  display: flex;
+  gap: 4px;
+  margin-top: 16px;
+  padding: 4px;
+  border-radius: 12px;
+  background: var(--bg);
+  flex-shrink: 0;
+}
+
+.config-tab {
+  flex: 1;
+  padding: 8px 6px;
+  border: none;
+  border-radius: 9px;
+  background: transparent;
+  color: var(--muted);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.config-tab.is-active {
+  background: var(--surface);
+  color: var(--text);
+  box-shadow: 0 0 0 1px #2a2a35;
+}
+
+.config-panels {
+  margin-top: 16px;
+  min-height: 0;
+  flex: 1;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.config-panel[hidden] {
+  display: none;
+}
+
 .config-hint {
-  margin-top: 8px;
-  font-size: 0.875rem;
+  margin-bottom: 14px;
+  font-size: 0.8125rem;
   color: var(--muted);
   line-height: 1.4;
 }
@@ -450,7 +521,6 @@ body {
 }
 
 .config-field-label[for="config-ip"] {
-  margin-top: 16px;
   margin-bottom: 0;
 }
 
@@ -459,15 +529,19 @@ body {
   border-color: var(--accent);
 }
 
-.config-field {
-  margin-top: 18px;
+.config-status {
+  min-height: 1.25rem;
+  margin-top: 10px;
+  font-size: 0.8125rem;
+  color: var(--muted);
 }
 
-.config-sources-hint {
-  margin: -2px 0 10px;
-  font-size: 0.75rem;
-  color: var(--muted);
-  line-height: 1.35;
+.config-status.is-error {
+  color: var(--danger);
+}
+
+.config-status.is-ok {
+  color: var(--accent);
 }
 
 .config-toggle {
@@ -624,44 +698,12 @@ body {
 }
 
 .config-version {
-  margin-top: 18px;
+  margin-top: 14px;
   font-size: 0.75rem;
   color: var(--muted);
   text-align: center;
   letter-spacing: 0.02em;
-}
-
-.config-error {
-  min-height: 1.25rem;
-  margin-top: 8px;
-  font-size: 0.8125rem;
-  color: var(--danger);
-}
-
-.config-actions {
-  display: flex;
-  justify-content: flex-end;
-  gap: 8px;
-  margin-top: 16px;
-}
-
-.btn {
-  padding: 10px 16px;
-  border-radius: 10px;
-  border: none;
-  font-size: 0.9375rem;
-  font-weight: 600;
-  cursor: pointer;
-}
-
-.btn-ghost {
-  background: transparent;
-  color: var(--muted);
-}
-
-.btn-primary {
-  background: var(--accent);
-  color: var(--bg);
+  flex-shrink: 0;
 }
 
 @media (min-width: 480px) {

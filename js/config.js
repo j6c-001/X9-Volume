@@ -12,21 +12,25 @@ import {
   sourceIconSvg,
 } from './sources.js';
 
+const PANELS = ['device', 'appearance', 'sources'];
+
 export function createConfigDialog({ onSourcesChanged } = {}) {
   const overlay = document.getElementById('config-overlay');
-  const form = document.getElementById('config-form');
+  const closeBtn = document.getElementById('config-close');
   const input = document.getElementById('config-ip');
   const colorInput = document.getElementById('config-color');
   const swatchesRoot = document.getElementById('config-swatches');
   const sourcesRoot = document.getElementById('config-sources');
   const iconOnlyInput = document.getElementById('config-source-icon-only');
-  const error = document.getElementById('config-error');
-  const cancelBtn = document.getElementById('config-cancel');
+  const statusEl = document.getElementById('config-status');
   const versionEl = document.getElementById('config-version');
-  let draftColor = getKnobColor();
-  let savedColorOnOpen = draftColor;
-  let draftSources = getSourceConfig();
-  let draftIconOnly = getSourceIconOnly();
+  const tabs = [...overlay.querySelectorAll('.config-tab')];
+  const panels = Object.fromEntries(
+    PANELS.map((id) => [id, document.getElementById(`config-panel-${id}`)]),
+  );
+
+  let connecting = false;
+  let lastTriedIp = '';
 
   versionEl.textContent = `App v${APP_VERSION}`;
 
@@ -39,23 +43,40 @@ export function createConfigDialog({ onSourcesChanged } = {}) {
     btn.setAttribute('aria-label', swatch.label);
     btn.dataset.color = swatch.hex;
     btn.addEventListener('click', () => {
-      draftColor = swatch.hex;
       colorInput.value = swatch.hex;
-      applyKnobColor(draftColor);
-      syncSwatchActive();
+      saveKnobColor(swatch.hex);
+      syncSwatchActive(swatch.hex);
     });
     swatchesRoot.insertBefore(btn, colorInput);
   }
 
-  function syncSwatchActive() {
+  function syncSwatchActive(hex = getKnobColor()) {
     for (const btn of swatchesRoot.querySelectorAll('.config-swatch')) {
-      btn.classList.toggle('is-active', btn.dataset.color === draftColor);
+      btn.classList.toggle('is-active', btn.dataset.color === hex);
     }
   }
 
+  function setPanel(panelId) {
+    const next = PANELS.includes(panelId) ? panelId : 'device';
+    for (const tab of tabs) {
+      const active = tab.dataset.panel === next;
+      tab.classList.toggle('is-active', active);
+      tab.setAttribute('aria-selected', active ? 'true' : 'false');
+    }
+    for (const id of PANELS) {
+      panels[id].hidden = id !== next;
+    }
+  }
+
+  function persistSources(next) {
+    saveSourceConfig(next);
+    onSourcesChanged?.();
+  }
+
   function renderSourcesEditor() {
+    const sources = getSourceConfig();
     sourcesRoot.replaceChildren();
-    for (const entry of draftSources) {
+    for (const entry of sources) {
       const stock = INPUT_LABELS[entry.index] || `Input ${entry.index}`;
       const row = document.createElement('div');
       row.className = 'config-source-row';
@@ -86,19 +107,20 @@ export function createConfigDialog({ onSourcesChanged } = {}) {
       const iconsRoot = row.querySelector('.config-source-icons');
 
       checkbox.addEventListener('change', () => {
-        draftSources[entry.index] = {
-          ...draftSources[entry.index],
-          enabled: checkbox.checked,
-        };
+        const next = getSourceConfig();
+        next[entry.index] = { ...next[entry.index], enabled: checkbox.checked };
+        persistSources(next);
         row.classList.toggle('is-disabled', !checkbox.checked);
       });
       row.classList.toggle('is-disabled', !entry.enabled);
 
       labelInput.addEventListener('input', () => {
-        draftSources[entry.index] = {
-          ...draftSources[entry.index],
+        const next = getSourceConfig();
+        next[entry.index] = {
+          ...next[entry.index],
           label: labelInput.value.trim().slice(0, 24),
         };
+        persistSources(next);
       });
 
       for (const icon of SOURCE_ICONS) {
@@ -111,10 +133,9 @@ export function createConfigDialog({ onSourcesChanged } = {}) {
         btn.innerHTML = sourceIconSvg(icon.id, 16);
         if (entry.icon === icon.id) btn.classList.add('is-active');
         btn.addEventListener('click', () => {
-          draftSources[entry.index] = {
-            ...draftSources[entry.index],
-            icon: icon.id,
-          };
+          const next = getSourceConfig();
+          next[entry.index] = { ...next[entry.index], icon: icon.id };
+          persistSources(next);
           for (const b of iconsRoot.querySelectorAll('.config-source-icon-btn')) {
             b.classList.toggle('is-active', b.dataset.icon === icon.id);
           }
@@ -126,64 +147,27 @@ export function createConfigDialog({ onSourcesChanged } = {}) {
     }
   }
 
-  function open() {
-    input.value = state.ip;
-    draftColor = getKnobColor();
-    savedColorOnOpen = draftColor;
-    colorInput.value = draftColor;
-    applyKnobColor(draftColor);
-    syncSwatchActive();
-    draftSources = getSourceConfig().map((s) => ({ ...s }));
-    draftIconOnly = getSourceIconOnly();
-    iconOnlyInput.checked = draftIconOnly;
-    renderSourcesEditor();
-    error.textContent = '';
-    overlay.hidden = false;
-    input.focus();
+  function setStatus(message, kind = '') {
+    statusEl.textContent = message;
+    statusEl.classList.toggle('is-error', kind === 'error');
+    statusEl.classList.toggle('is-ok', kind === 'ok');
   }
 
-  iconOnlyInput.addEventListener('change', () => {
-    draftIconOnly = iconOnlyInput.checked;
-  });
-
-  function close() {
-    overlay.hidden = true;
-    error.textContent = '';
-  }
-
-  cancelBtn.addEventListener('click', () => {
-    applyKnobColor(savedColorOnOpen);
-    close();
-  });
-
-  overlay.addEventListener('click', (e) => {
-    if (e.target === overlay) {
-      applyKnobColor(getKnobColor());
-      close();
-    }
-  });
-
-  colorInput.addEventListener('input', () => {
-    draftColor = colorInput.value;
-    applyKnobColor(draftColor);
-    syncSwatchActive();
-  });
-
-  form.addEventListener('submit', async (e) => {
-    e.preventDefault();
+  async function connectDevice({ force = false } = {}) {
     const ip = input.value.trim();
     if (!isValidIp(ip)) {
-      error.textContent = 'Enter a valid IP address or hostname.';
-      return;
+      setStatus('Enter a valid IP address or hostname.', 'error');
+      return false;
+    }
+    if (connecting) return false;
+    if (!force && ip === state.ip && state.connected && ip === lastTriedIp) {
+      setStatus('Connected.', 'ok');
+      return true;
     }
 
-    saveKnobColor(draftColor);
-    savedColorOnOpen = draftColor;
-    saveSourceConfig(draftSources);
-    saveSourceIconOnly(draftIconOnly);
-    onSourcesChanged?.();
-
-    error.textContent = 'Connecting…';
+    connecting = true;
+    lastTriedIp = ip;
+    setStatus('Connecting…');
     try {
       const ctrl = new AbortController();
       await getId(ip, ctrl.signal);
@@ -193,8 +177,6 @@ export function createConfigDialog({ onSourcesChanged } = {}) {
         ip,
         failures: 0,
         connected: true,
-      });
-      setState({
         device: data.device || 'Luxsin-X9',
         title: data.input === 4 && data.bt_title ? data.bt_title : (data.device || 'Luxsin-X9'),
         input: data.input ?? 0,
@@ -205,10 +187,64 @@ export function createConfigDialog({ onSourcesChanged } = {}) {
         muted: !!data.isDacMetuVolume,
       });
       resetPoller();
-      close();
+      setStatus('Connected.', 'ok');
+      return true;
     } catch (_) {
-      error.textContent = 'Could not reach device. Check IP and LAN connection.';
+      setStatus('Could not reach device. Check IP and LAN connection.', 'error');
+      return false;
+    } finally {
+      connecting = false;
     }
+  }
+
+  function open(panel = 'device') {
+    input.value = state.ip;
+    const color = getKnobColor();
+    colorInput.value = color;
+    applyKnobColor(color);
+    syncSwatchActive(color);
+    iconOnlyInput.checked = getSourceIconOnly();
+    renderSourcesEditor();
+    setStatus(state.ip && state.connected ? 'Connected.' : '', state.connected ? 'ok' : '');
+    setPanel(state.ip ? panel : 'device');
+    overlay.hidden = false;
+    if (!state.ip || panel === 'device') input.focus();
+  }
+
+  function close() {
+    overlay.hidden = true;
+    setStatus('');
+  }
+
+  for (const tab of tabs) {
+    tab.addEventListener('click', () => setPanel(tab.dataset.panel));
+  }
+
+  closeBtn.addEventListener('click', close);
+
+  overlay.addEventListener('click', (e) => {
+    if (e.target === overlay) close();
+  });
+
+  colorInput.addEventListener('input', () => {
+    const color = saveKnobColor(colorInput.value);
+    syncSwatchActive(color);
+  });
+
+  iconOnlyInput.addEventListener('change', () => {
+    saveSourceIconOnly(iconOnlyInput.checked);
+    onSourcesChanged?.();
+  });
+
+  input.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      connectDevice({ force: true });
+    }
+  });
+
+  input.addEventListener('change', () => {
+    connectDevice({ force: true });
   });
 
   return { open, close };
