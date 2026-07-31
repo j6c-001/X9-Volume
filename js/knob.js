@@ -78,9 +78,9 @@ export function createKnob(root) {
     setVolume(state.ip, v).catch(() => {});
   }
 
-  function scheduleVolume(volume) {
+  function scheduleVolume(db) {
     if (state.muted) return;
-    pendingVolume = volume;
+    pendingVolume = toVolume(db, state.soundStep);
     if (throttleTimer) return;
     throttleTimer = setTimeout(() => {
       throttleTimer = null;
@@ -90,11 +90,9 @@ export function createKnob(root) {
 
   function applyDb(db) {
     if (state.muted) return;
-    const volume = toVolume(db, state.soundStep);
-    localDb = toDb(volume);
+    localDb = Math.max(MIN_DB, Math.min(MAX_DB, db));
     render(localDb);
-    setState({ volume });
-    scheduleVolume(volume);
+    scheduleVolume(localDb);
   }
 
   function pointerAngle(clientX, clientY) {
@@ -154,8 +152,12 @@ export function createKnob(root) {
     pointerDown = false;
 
     if (dragActive) {
+      const volume = toVolume(localDb, state.soundStep);
+      localDb = toDb(volume);
+      render(localDb);
+      setState({ volume, dragging: false });
+      pendingVolume = volume;
       flushVolume();
-      setState({ dragging: false });
     }
 
     dragActive = false;
