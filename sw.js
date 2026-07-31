@@ -1,4 +1,4 @@
-const CACHE = 'x9-volume-v8';
+const CACHE = 'x9-volume-v9';
 
 function asset(path) {
   return new URL(path, self.location).href;
@@ -17,6 +17,7 @@ const ASSETS = [
   'js/theme.js',
   'js/sources.js',
   'js/source-selector.js',
+  'js/haptics.js',
   'js/version.js',
   'manifest.webmanifest',
   'icons/icon-192.png',

@@ -1,5 +1,6 @@
 import { setInput } from './api.js';
-import { state, setState, haptic } from './state.js';
+import { state, setState } from './state.js';
+import { hapticImpact } from './haptics.js';
 import {
   getSourceConfig,
   getSourceIconOnly,
@@ -21,7 +22,7 @@ export function createSourceSelector(root) {
 
     switching = true;
     setState({ input: index });
-    haptic();
+    hapticImpact();
 
     try {
       await setInput(state.ip, index);
