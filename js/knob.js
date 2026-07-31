@@ -10,9 +10,16 @@ import {
   hapticRelease,
   hapticImpact,
 } from './haptics.js';
+import {
+  getMaxVolumeDb,
+  getLoudGateDb,
+  LOUD_ZONE_GEAR,
+  VOLUME_DB_FLOOR,
+  VOLUME_DB_CEILING,
+} from './volume-limit.js';
 
-const MIN_DB = -100;
-const MAX_DB = 0;
+const MIN_DB = VOLUME_DB_FLOOR;
+const MAX_DB = VOLUME_DB_CEILING;
 const START_ANGLE = 135;
 const SWEEP = 270;
 
@@ -119,7 +126,17 @@ export function createKnob(root) {
   let localDb = toDb(state.volume);
   let lastSentStep = null;
   let endstopLatched = false;
+  let gateLatched = false;
+  let loudZoneAdmitted = false;
   let didDrag = false;
+
+  function softMaxDb() {
+    return getMaxVolumeDb();
+  }
+
+  function loudGateDb() {
+    return getLoudGateDb(softMaxDb());
+  }
 
   function render(db) {
     const angle = dbToAngle(db);
@@ -141,7 +158,7 @@ export function createKnob(root) {
 
   function feedbackForStep(prevVolume, nextVolume) {
     const minVol = toVolume(MIN_DB, state.soundStep);
-    const maxVol = toVolume(MAX_DB, state.soundStep);
+    const maxVol = toVolume(softMaxDb(), state.soundStep);
     const atEnd = nextVolume <= minVol || nextVolume >= maxVol;
 
     if (atEnd) {
@@ -181,7 +198,14 @@ export function createKnob(root) {
 
   function applyDb(db) {
     if (state.muted) return;
-    localDb = Math.max(MIN_DB, Math.min(MAX_DB, db));
+    const max = softMaxDb();
+    let next = Math.max(MIN_DB, db);
+    if (next > max) {
+      // Device may already be above the soft max — don't yank it down on touch.
+      // Block further increases; allow decreases through the ceiling.
+      next = localDb > max ? Math.min(next, localDb) : max;
+    }
+    localDb = next;
     render(localDb);
     scheduleVolume(localDb);
   }
@@ -224,8 +248,13 @@ export function createKnob(root) {
     activePointerId = e.pointerId;
     lastPointerAngle = angle;
     lastSentStep = toVolume(localDb, state.soundStep);
+    const maxDb = softMaxDb();
+    const gate = loudGateDb();
+    // Already in the loud zone (or at the gate): this grab may continue upward.
+    loudZoneAdmitted = localDb >= gate - 1e-6;
+    gateLatched = false;
     endstopLatched = lastSentStep <= toVolume(MIN_DB, state.soundStep)
-      || lastSentStep >= toVolume(MAX_DB, state.soundStep);
+      || lastSentStep >= toVolume(maxDb, state.soundStep);
     stack.classList.add('is-dragging');
     setState({ dragging: true });
     hapticGrab();
@@ -244,9 +273,43 @@ export function createKnob(root) {
     // Cap per-frame jumps so a stray sample can't slam volume
     delta = Math.max(-24, Math.min(24, delta));
 
-    const dbDelta = (delta / GEAR_DEG) * (MAX_DB - MIN_DB);
-    if (Math.abs(dbDelta) > 0.001) didDrag = true;
-    applyDb(localDb + dbDelta);
+    let dbDelta = (delta / GEAR_DEG) * (MAX_DB - MIN_DB);
+    const gate = loudGateDb();
+
+    // Leaving the loud zone clears admission so re-entry needs another grab.
+    if (localDb < gate - 1e-6) {
+      loudZoneAdmitted = false;
+      gateLatched = false;
+    }
+
+    // Stiffer gearing when raising volume inside the loud zone.
+    if (dbDelta > 0 && loudZoneAdmitted && localDb >= gate - 1e-6) {
+      dbDelta /= LOUD_ZONE_GEAR;
+    }
+
+    let nextDb = localDb + dbDelta;
+
+    // Soft gate: first upward cross into the loud zone stops until re-grab.
+    if (dbDelta > 0 && !loudZoneAdmitted) {
+      if (localDb < gate && nextDb >= gate) {
+        nextDb = gate;
+        if (Math.abs(nextDb - localDb) > 0.001) didDrag = true;
+        applyDb(nextDb);
+        if (!gateLatched) {
+          gateLatched = true;
+          hapticImpact();
+        }
+        lastPointerAngle = angle;
+        return;
+      }
+      if (localDb >= gate - 1e-6) {
+        lastPointerAngle = angle;
+        return;
+      }
+    }
+
+    if (Math.abs(nextDb - localDb) > 0.001) didDrag = true;
+    applyDb(nextDb);
     lastPointerAngle = angle;
   }
 

@@ -101,6 +101,27 @@
           <label class="config-field-label" for="config-ip">Device IP</label>
           <input type="text" id="config-ip" name="ip" inputmode="decimal" autocomplete="off" placeholder="192.168.1.100">
           <p class="config-status" id="config-status" aria-live="polite"></p>
+
+          <div class="config-volume-limit">
+            <div class="config-volume-limit-row">
+              <label class="config-field-label" for="config-max-volume">Max volume</label>
+              <span class="config-volume-limit-value" id="config-max-volume-value">−20 dB</span>
+            </div>
+            <input
+              type="range"
+              class="config-volume-slider"
+              id="config-max-volume"
+              min="-60"
+              max="0"
+              step="1"
+              value="-20"
+              aria-valuemin="-60"
+              aria-valuemax="0"
+              aria-valuenow="-20"
+              aria-label="Maximum volume"
+            >
+            <p class="config-hint config-hint-tight">Knob stops here. The last 12 dB below this ceiling is slower and needs a second turn to enter.</p>
+          </div>
         </section>
 
         <section class="config-panel" id="config-panel-appearance" role="tabpanel" aria-labelledby="config-tab-appearance" hidden>
