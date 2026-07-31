@@ -24,11 +24,13 @@ Open the app on your phone (same LAN as the X9). Enter the device IP in settings
 
 The app is intended to be served over **HTTPS** (e.g. [GitHub Pages](https://j6c-001.github.io/X9-Volume/)). Device API calls use plain HTTP on your LAN, so browsers log **mixed content** warnings in the console. That is expected and does not affect the PWA shell itself.
 
-App version is in `js/version.js` (`APP_VERSION`) and shown in Settings. Bump it on every submit.
+App version is in `js/version.js` (`APP_VERSION`) and shown in Settings. **Bump it on every deploy** — the service worker cache name is derived from it, so installed clients fetch a new worker, activate it (`skipWaiting` + `clients.claim`), and reload once.
+
+While the app is open it also rechecks for updates on foreground and about every 30 minutes.
 
 ## Install
 
-Use your browser’s **Add to Home Screen** / **Install app** option. The app runs standalone with no build step and no dependencies.
+Use your browser’s **Add to Home Screen** / **Install app** option. The app runs standalone with no build step and no dependencies. After a deploy, reopen the app (or wait for the periodic check) — it should refresh itself onto the new version.
 
 ## API
 

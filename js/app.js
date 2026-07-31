@@ -6,6 +6,7 @@ import { createConfigDialog } from './config.js';
 import { createSourceSelector } from './source-selector.js';
 import { resolveSource } from './sources.js';
 import { applyKnobColor, getKnobColor } from './theme.js';
+import { registerServiceWorker } from './update.js';
 
 applyKnobColor(getKnobColor());
 
@@ -47,9 +48,7 @@ subscribe(() => {
   knob.syncFromState();
 });
 
-if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register(new URL('../sw.js', import.meta.url)).catch(() => {});
-}
+registerServiceWorker().catch(() => {});
 
 if (!state.ip) {
   config.open();
