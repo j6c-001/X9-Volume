@@ -1,4 +1,4 @@
-import { getId, syncData, isValidIp, canReachDevice } from './api.js';
+import { getId, syncData, isValidIp, usesLocalNetworkPermission } from './api.js';
 import { state, setState } from './state.js';
 import { resetPoller } from './poller.js';
 
@@ -35,12 +35,9 @@ export function createConfigDialog() {
       return;
     }
 
-    if (!canReachDevice()) {
-      error.textContent = 'Device control requires opening this app over HTTP on your LAN. HTTPS pages cannot reach the X9 API.';
-      return;
-    }
-
-    error.textContent = 'Connecting…';
+    error.textContent = usesLocalNetworkPermission()
+      ? 'Connecting… allow local network access if your browser asks.'
+      : 'Connecting…';
     try {
       const ctrl = new AbortController();
       await getId(ip, ctrl.signal);
@@ -64,7 +61,9 @@ export function createConfigDialog() {
       resetPoller();
       close();
     } catch (_) {
-      error.textContent = 'Could not reach device. Check IP and LAN connection.';
+      error.textContent = usesLocalNetworkPermission()
+        ? 'Could not reach device. Allow local network access when prompted, then try again.'
+        : 'Could not reach device. Check IP and LAN connection.';
     }
   });
 

@@ -18,9 +18,15 @@ Serve the static files from this directory:
 python3 -m http.server 8080
 ```
 
-Open `http://<your-machine-ip>:8080` on your phone (same LAN as the X9). Enter the device IP in settings.
+Open the app on your phone (same LAN as the X9). Enter the device IP in settings.
 
-**Important:** The X9 API is HTTP-only. Browsers block HTTPS pages (including GitHub Pages) from calling `http://192.168.x.x`. Serve this app over **HTTP on your LAN** for device control to work. GitHub Pages is fine for viewing the UI, but volume control requires a local HTTP server.
+On **HTTPS** (e.g. GitHub Pages), Chrome will prompt for **local network access** — tap Allow. Device requests use `targetAddressSpace: "local"` so the browser can reach the X9 over HTTP. You can also serve locally:
+
+```bash
+python3 -m http.server 8080
+```
+
+Then open `http://<your-machine-ip>:8080`.
 
 ## Install
 
