@@ -25,7 +25,8 @@ function dbToAngle(db) {
 }
 
 function dbToKnobRotation(db) {
-  return ((db - MIN_DB) / (MAX_DB - MIN_DB)) * GEAR_DEG;
+  // Indicator is drawn pointing up (−90°); rotate so it matches the track angle.
+  return dbToAngle(db) + 90;
 }
 
 function polar(cx, cy, r, deg) {
