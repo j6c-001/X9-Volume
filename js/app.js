@@ -1,4 +1,4 @@
-import { INPUT_LABELS, formatFirmwareVersion, usesLocalNetworkPermission } from './api.js';
+import { INPUT_LABELS, formatFirmwareVersion } from './api.js';
 import { state, setState, subscribe } from './state.js';
 import { startPoller } from './poller.js';
 import { createKnob } from './knob.js';
@@ -24,11 +24,7 @@ function renderHeader() {
   let statusText = `${inputLabel}${format}${firmware}`;
 
   if (!state.connected) {
-    if (state.ip && usesLocalNetworkPermission()) {
-      statusText = 'Allow local network access when prompted';
-    } else {
-      statusText = state.ip ? 'Unreachable' : 'No device configured';
-    }
+    statusText = state.ip ? 'Unreachable' : 'No device configured';
   }
 
   statusEl.textContent = statusText;

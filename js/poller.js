@@ -1,22 +1,16 @@
-import { getMsgCount, syncData, usesLocalNetworkPermission } from './api.js';
+import { getMsgCount, syncData } from './api.js';
 import { state, setState, mergeFromServer } from './state.js';
+
+const POLL_MS = 400;
 
 let timer = null;
 let lastMsgCount = null;
 let abortController = null;
 
-function pollInterval() {
-  if (!usesLocalNetworkPermission()) return 400;
-  if (state.failures >= 10) return 5000;
-  if (state.failures >= 3) return 2000;
-  return 400;
-}
-
 async function tick() {
-  const interval = pollInterval();
 
   if (document.hidden || !state.ip) {
-    timer = setTimeout(tick, interval);
+    timer = setTimeout(tick, POLL_MS);
     return;
   }
 
@@ -34,7 +28,7 @@ async function tick() {
     }
   } catch (e) {
     if (e.name === 'AbortError') {
-      timer = setTimeout(tick, interval);
+      timer = setTimeout(tick, POLL_MS);
       return;
     }
     const failures = state.failures + 1;
@@ -44,7 +38,7 @@ async function tick() {
     });
   }
 
-  timer = setTimeout(tick, interval);
+  timer = setTimeout(tick, POLL_MS);
 }
 
 export function startPoller() {

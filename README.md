@@ -20,23 +20,7 @@ python3 -m http.server 8080
 
 Open the app on your phone (same LAN as the X9). Enter the device IP in settings.
 
-On **HTTPS** (e.g. GitHub Pages), Chrome can allow LAN access if:
-
-1. You click **Allow** on the browser’s **local network access** prompt (triggered when you save the device IP).
-2. The app sends `targetAddressSpace: "local"` on each device request (already implemented).
-3. The **X9 firmware** responds to CORS preflight (`OPTIONS`) with:
-   - `Access-Control-Allow-Origin: *` (already present)
-   - `Access-Control-Allow-Private-Network: true` (required by Chrome; Luxsin would need to add this)
-
-There is **no header you can add to GitHub Pages alone** to suppress mixed-content warnings — the exemption depends on browser permission plus the device CORS headers above.
-
-If HTTPS + LAN access still fails, serve locally over HTTP:
-
-```bash
-python3 -m http.server 8080
-```
-
-Then open `http://<your-machine-ip>:8080`.
+The app is intended to be served over **HTTPS** (e.g. [GitHub Pages](https://j6c-001.github.io/X9-Volume/)). Device API calls use plain HTTP on your LAN, so browsers log **mixed content** warnings in the console. That is expected and does not affect the PWA shell itself.
 
 ## Install
 

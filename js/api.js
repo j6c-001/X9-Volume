@@ -46,37 +46,14 @@ export function formatFirmwareVersion(value) {
   return `${Math.floor(n / 1000)}.${Math.floor((n % 1000) / 100)}.0.${n % 10}`;
 }
 
-export function getTargetAddressSpace(host) {
-  const h = host.trim().toLowerCase();
-  if (h === 'localhost' || h === '127.0.0.1' || h === '::1' || h === '[::1]') {
-    return 'loopback';
-  }
-  if (/\.local$/i.test(h)) return 'local';
-  if (/^(10\.|192\.168\.|169\.254\.)/.test(h)) return 'local';
-  if (/^172\.(1[6-9]|2\d|3[01])\./.test(h)) return 'local';
-  if (/^(?:\d{1,3}\.){3}\d{1,3}$/.test(h)) return 'local';
-  return 'local';
-}
-
-export function usesLocalNetworkPermission() {
-  return location.protocol === 'https:';
-}
-
 export function deviceFetch(ip, path, options = {}) {
   const url = `http://${ip}${path}`;
-  const init = {
+  return fetch(url, {
     method: 'GET',
     mode: 'cors',
     credentials: 'omit',
     ...options,
-    targetAddressSpace: getTargetAddressSpace(ip),
-  };
-  return fetch(new Request(url, init));
-}
-
-/** Probe device on user gesture so Chrome can show Local Network Access prompt. */
-export async function requestLocalNetworkAccess(ip, signal) {
-  return getId(ip, signal);
+  });
 }
 
 export async function getMsgCount(ip, signal) {

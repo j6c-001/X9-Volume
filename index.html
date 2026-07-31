@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#0a0a0f">
   <meta name="mobile-web-app-capable" content="yes">
-  <meta http-equiv="Permissions-Policy" content="local-network=(self), loopback-network=(self)">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <title>X9 Volume</title>
   <link rel="manifest" href="manifest.webmanifest">
@@ -38,7 +37,7 @@
   <div class="config-overlay" id="config-overlay" hidden>
     <div class="config-dialog" role="dialog" aria-labelledby="config-title" aria-modal="true">
       <h2 id="config-title">Device IP</h2>
-      <p class="config-hint">Enter the Luxsin X9 IP address on your local network. If this page is HTTPS, your browser will ask to allow local network access.</p>
+      <p class="config-hint">Enter the Luxsin X9 IP address on your local network.</p>
       <form id="config-form">
         <input type="text" id="config-ip" name="ip" inputmode="decimal" autocomplete="off" placeholder="192.168.1.100" required>
         <p class="config-error" id="config-error" aria-live="polite"></p>
