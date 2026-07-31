@@ -36,16 +36,26 @@
 
   <div class="config-overlay" id="config-overlay" hidden>
     <div class="config-dialog" role="dialog" aria-labelledby="config-title" aria-modal="true">
-      <h2 id="config-title">Device IP</h2>
-      <p class="config-hint">Enter the Luxsin X9 IP address on your local network.</p>
+      <h2 id="config-title">Settings</h2>
+      <p class="config-hint">Device IP on your local network, and knob accent colour.</p>
       <form id="config-form">
+        <label class="config-field-label" for="config-ip">Device IP</label>
         <input type="text" id="config-ip" name="ip" inputmode="decimal" autocomplete="off" placeholder="192.168.1.100" required>
+
+        <div class="config-field">
+          <span class="config-field-label" id="config-color-label">Knob colour</span>
+          <div class="config-swatches" id="config-swatches" role="group" aria-labelledby="config-color-label">
+            <input type="color" id="config-color" class="config-color-custom" name="color" aria-label="Custom knob colour" value="#5eead4">
+          </div>
+        </div>
+
         <p class="config-error" id="config-error" aria-live="polite"></p>
         <div class="config-actions">
           <button type="button" class="btn btn-ghost" id="config-cancel">Cancel</button>
           <button type="submit" class="btn btn-primary">Save</button>
         </div>
       </form>
+      <p class="config-version" id="config-version"></p>
     </div>
   </div>
 

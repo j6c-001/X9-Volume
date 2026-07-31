@@ -1,8 +1,11 @@
 import { INPUT_LABELS, formatFirmwareVersion } from './api.js';
-import { state, setState, subscribe } from './state.js';
+import { state, subscribe } from './state.js';
 import { startPoller } from './poller.js';
 import { createKnob } from './knob.js';
 import { createConfigDialog } from './config.js';
+import { applyKnobColor, getKnobColor } from './theme.js';
+
+applyKnobColor(getKnobColor());
 
 const titleEl = document.getElementById('header-title');
 const statusEl = document.getElementById('header-status');

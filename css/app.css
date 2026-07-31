@@ -149,15 +149,19 @@ body {
 }
 
 .knob-stack.is-muted .knob-fill,
-.knob-stack.is-muted .knob-handle {
+.knob-stack.is-muted .knob-handle,
+.knob-stack.is-muted .knob-indicator {
   stroke: #555;
   fill: #555;
   filter: none;
 }
 
 .knob-stack.is-muted .knob-body {
-  opacity: 0.45;
-  pointer-events: none;
+  opacity: 0.4;
+}
+
+.knob-stack.is-muted {
+  cursor: default;
 }
 
 .knob-stack.disabled .knob-body {
@@ -226,15 +230,23 @@ body {
 
 .knob-readout {
   position: absolute;
-  top: 22%;
   left: 50%;
+  bottom: 2.5%;
+  top: auto;
   transform: translateX(-50%);
-  font-size: clamp(1.35rem, 5.5vw, 1.85rem);
+  z-index: 1;
+  font-size: clamp(1.2rem, 5vw, 1.65rem);
   font-weight: 600;
   font-variant-numeric: tabular-nums;
   letter-spacing: -0.03em;
   pointer-events: none;
   text-shadow: 0 2px 12px rgba(0, 0, 0, 0.65);
+  color: var(--text);
+}
+
+.knob-readout.is-muted {
+  color: var(--muted);
+  opacity: 0.55;
 }
 
 .knob-mute {
@@ -319,9 +331,9 @@ body {
   line-height: 1.4;
 }
 
-.config-dialog input {
+.config-dialog input[type="text"] {
   width: 100%;
-  margin-top: 16px;
+  margin-top: 6px;
   padding: 12px 14px;
   border: 1px solid #2a2a35;
   border-radius: 10px;
@@ -330,9 +342,79 @@ body {
   font-size: 1rem;
 }
 
-.config-dialog input:focus {
+.config-field-label {
+  display: block;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--muted);
+  margin-bottom: 8px;
+}
+
+.config-field-label[for="config-ip"] {
+  margin-top: 16px;
+  margin-bottom: 0;
+}
+
+.config-dialog input[type="text"]:focus {
   outline: 2px solid var(--accent-dim);
   border-color: var(--accent);
+}
+
+.config-field {
+  margin-top: 18px;
+}
+
+.config-swatches {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+
+.config-swatch {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  padding: 0;
+  cursor: pointer;
+  background: var(--swatch, var(--accent));
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.12);
+  -webkit-tap-highlight-color: transparent;
+}
+
+.config-swatch.is-active {
+  border-color: var(--text);
+  box-shadow: 0 0 0 2px var(--bg), 0 0 0 4px var(--swatch, var(--accent));
+}
+
+.config-color-custom {
+  width: 34px !important;
+  height: 34px;
+  margin-top: 0 !important;
+  padding: 0 !important;
+  border-radius: 50% !important;
+  border: 2px solid #2a2a35 !important;
+  background: transparent;
+  cursor: pointer;
+  overflow: hidden;
+}
+
+.config-color-custom::-webkit-color-swatch-wrapper {
+  padding: 0;
+}
+
+.config-color-custom::-webkit-color-swatch {
+  border: none;
+  border-radius: 50%;
+}
+
+.config-version {
+  margin-top: 18px;
+  font-size: 0.75rem;
+  color: var(--muted);
+  text-align: center;
+  letter-spacing: 0.02em;
 }
 
 .config-error {

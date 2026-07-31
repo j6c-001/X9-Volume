@@ -1,4 +1,4 @@
-const CACHE = 'x9-volume-v2';
+const CACHE = 'x9-volume-v3';
 
 function asset(path) {
   return new URL(path, self.location).href;
@@ -14,6 +14,8 @@ const ASSETS = [
   'js/poller.js',
   'js/knob.js',
   'js/config.js',
+  'js/theme.js',
+  'js/version.js',
   'manifest.webmanifest',
   'icons/icon-192.png',
   'icons/icon-512.png',
