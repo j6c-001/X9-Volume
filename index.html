@@ -30,31 +30,54 @@
     </header>
 
     <main class="main">
+      <div id="source-root" class="source-root"></div>
       <div id="knob-root"></div>
     </main>
   </div>
 
   <div class="config-overlay" id="config-overlay" hidden>
     <div class="config-dialog" role="dialog" aria-labelledby="config-title" aria-modal="true">
-      <h2 id="config-title">Settings</h2>
-      <p class="config-hint">Device IP on your local network, and knob accent colour.</p>
-      <form id="config-form">
-        <label class="config-field-label" for="config-ip">Device IP</label>
-        <input type="text" id="config-ip" name="ip" inputmode="decimal" autocomplete="off" placeholder="192.168.1.100" required>
+      <div class="config-header">
+        <h2 id="config-title">Settings</h2>
+        <button type="button" class="config-close" id="config-close" aria-label="Close settings">
+          <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
+            <path d="M6.4 6.4 17.6 17.6M17.6 6.4 6.4 17.6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+        </button>
+      </div>
 
-        <div class="config-field">
+      <div class="config-tabs" role="tablist" aria-label="Settings sections">
+        <button type="button" class="config-tab is-active" role="tab" id="config-tab-device" aria-controls="config-panel-device" aria-selected="true" data-panel="device">Device</button>
+        <button type="button" class="config-tab" role="tab" id="config-tab-appearance" aria-controls="config-panel-appearance" aria-selected="false" data-panel="appearance">Appearance</button>
+        <button type="button" class="config-tab" role="tab" id="config-tab-sources" aria-controls="config-panel-sources" aria-selected="false" data-panel="sources">Sources</button>
+      </div>
+
+      <div class="config-panels">
+        <section class="config-panel" id="config-panel-device" role="tabpanel" aria-labelledby="config-tab-device">
+          <p class="config-hint">IP address of the Luxsin X9 on your local network.</p>
+          <label class="config-field-label" for="config-ip">Device IP</label>
+          <input type="text" id="config-ip" name="ip" inputmode="decimal" autocomplete="off" placeholder="192.168.1.100">
+          <p class="config-status" id="config-status" aria-live="polite"></p>
+        </section>
+
+        <section class="config-panel" id="config-panel-appearance" role="tabpanel" aria-labelledby="config-tab-appearance" hidden>
+          <p class="config-hint">Accent colour for the volume knob and highlights.</p>
           <span class="config-field-label" id="config-color-label">Knob colour</span>
           <div class="config-swatches" id="config-swatches" role="group" aria-labelledby="config-color-label">
-            <input type="color" id="config-color" class="config-color-custom" name="color" aria-label="Custom knob colour" value="#5eead4">
+            <input type="color" id="config-color" class="config-color-custom" name="color" aria-label="Custom knob colour" value="#d2a06a">
           </div>
-        </div>
+        </section>
 
-        <p class="config-error" id="config-error" aria-live="polite"></p>
-        <div class="config-actions">
-          <button type="button" class="btn btn-ghost" id="config-cancel">Cancel</button>
-          <button type="submit" class="btn btn-primary">Save</button>
-        </div>
-      </form>
+        <section class="config-panel" id="config-panel-sources" role="tabpanel" aria-labelledby="config-tab-sources" hidden>
+          <p class="config-hint">Choose which inputs appear on the main screen, with custom labels and icons.</p>
+          <label class="config-toggle" for="config-source-icon-only">
+            <input type="checkbox" id="config-source-icon-only">
+            <span>Icon only on main screen</span>
+          </label>
+          <div class="config-sources" id="config-sources" role="group" aria-label="Source inputs"></div>
+        </section>
+      </div>
+
       <p class="config-version" id="config-version"></p>
     </div>
   </div>
