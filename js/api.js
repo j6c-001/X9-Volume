@@ -28,6 +28,24 @@ export function toVolume(db, soundStep = 0) {
   return snapVolume(raw, soundStep);
 }
 
+function parseVersionNumber(value) {
+  if (value == null) return 0;
+  if (typeof value === 'number' && Number.isFinite(value)) return value;
+  const text = String(value).trim();
+  if (!text) return 0;
+  const direct = Number(text);
+  if (Number.isFinite(direct)) return direct;
+  const digits = text.match(/\d+/g);
+  return digits?.length ? Number(digits[digits.length - 1]) : 0;
+}
+
+export function formatFirmwareVersion(value) {
+  if (value == null || String(value).trim() === '') return '';
+  const n = parseVersionNumber(value);
+  if (!n) return String(value);
+  return `${Math.floor(n / 1000)}.${Math.floor((n % 1000) / 100)}.0.${n % 10}`;
+}
+
 function base(ip) {
   return `http://${ip}`;
 }

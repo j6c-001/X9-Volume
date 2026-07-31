@@ -51,6 +51,7 @@ export function createConfigDialog() {
         title: data.input === 4 && data.bt_title ? data.bt_title : (data.device || 'Luxsin-X9'),
         input: data.input ?? 0,
         audioFormat: data.audioFormat || '',
+        version: data.version ?? '',
         volume: data.volume ?? 100,
         soundStep: data.soundStep ?? 0,
         muted: !!data.isDacMetuVolume,

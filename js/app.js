@@ -1,4 +1,4 @@
-import { INPUT_LABELS } from './api.js';
+import { INPUT_LABELS, formatFirmwareVersion } from './api.js';
 import { state, setState, subscribe } from './state.js';
 import { startPoller } from './poller.js';
 import { createKnob } from './knob.js';
@@ -19,7 +19,9 @@ function renderHeader() {
 
   const inputLabel = INPUT_LABELS[state.input] || 'Unknown';
   const format = state.audioFormat ? ` · ${state.audioFormat}` : '';
-  let statusText = `${inputLabel}${format}`;
+  const firmwareVersion = formatFirmwareVersion(state.version);
+  const firmware = firmwareVersion ? ` · v${firmwareVersion}` : '';
+  let statusText = `${inputLabel}${format}${firmware}`;
 
   if (!state.connected) {
     statusText = state.ip ? 'Unreachable' : 'No device configured';
