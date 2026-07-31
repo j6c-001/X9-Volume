@@ -43,7 +43,6 @@ export function createConfigDialog() {
       localStorage.setItem('x9-device-ip', ip);
       setState({
         ip,
-        poweredOff: false,
         failures: 0,
         connected: true,
       });

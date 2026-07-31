@@ -6,7 +6,7 @@ let lastMsgCount = null;
 let abortController = null;
 
 async function tick() {
-  const interval = state.poweredOff ? 2000 : 400;
+  const interval = 400;
 
   if (document.hidden || !state.ip) {
     timer = setTimeout(tick, interval);
@@ -18,12 +18,7 @@ async function tick() {
     abortController = new AbortController();
     const count = await getMsgCount(state.ip, abortController.signal);
 
-    if (state.poweringOff) {
-      timer = setTimeout(tick, interval);
-      return;
-    }
-
-    setState({ connected: true, failures: 0, poweredOff: false });
+    setState({ connected: true, failures: 0 });
 
     if (lastMsgCount === null || count !== lastMsgCount) {
       lastMsgCount = count;
@@ -38,7 +33,7 @@ async function tick() {
     const failures = state.failures + 1;
     setState({
       failures,
-      connected: failures < 3 && !state.poweredOff,
+      connected: failures < 3,
     });
   }
 

@@ -2,7 +2,7 @@ import { decodeCustomBase64 } from './codec.js';
 
 export const INPUT_LABELS = [
   'USB-B', 'USB-C', 'Coaxial', 'Optical',
-  'Bluetooth', 'HDMI eARC', 'Audio-in', 'Local',
+  'Bluetooth', 'HDMI-EARC', 'RCA', 'USB Driver',
 ];
 
 // Device soundStep 0..3 → 0.5, 1, 2, 3 dB per relay step (API volume units are 0.5 dB)
@@ -59,11 +59,6 @@ export async function setVolume(ip, volume) {
 
 export async function toggleMute(ip) {
   const res = await fetch(`${base(ip)}/dev/info.cgi?action=setting&isDacMetuVolume=1`);
-  return res.ok;
-}
-
-export async function powerOff(ip) {
-  const res = await fetch(`${base(ip)}/dev/info.cgi?action=setting&power=1`);
   return res.ok;
 }
 

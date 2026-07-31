@@ -236,6 +236,11 @@ body {
   filter: none;
 }
 
+.knob-dial.is-muted .knob-fill {
+  stroke: #555;
+  filter: none;
+}
+
 .knob-dot {
   fill: var(--text);
   filter: drop-shadow(0 1px 4px rgba(0, 0, 0, 0.5));

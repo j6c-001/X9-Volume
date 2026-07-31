@@ -3,7 +3,6 @@ const listeners = new Set();
 export const state = {
   ip: localStorage.getItem('x9-device-ip') || '',
   connected: false,
-  poweredOff: false,
   device: 'Luxsin-X9',
   title: 'Luxsin-X9',
   input: 0,
@@ -13,7 +12,6 @@ export const state = {
   muted: false,
   dragging: false,
   togglingMute: false,
-  poweringOff: false,
   failures: 0,
   msgCount: null,
 };
@@ -33,7 +31,7 @@ export function setState(partial) {
 }
 
 export function mergeFromServer(data, force = false) {
-  if (!force && (state.dragging || state.togglingMute || state.poweringOff)) return;
+  if (!force && (state.dragging || state.togglingMute)) return;
 
   const title = data.input === 4 && data.bt_title
     ? data.bt_title
@@ -41,7 +39,6 @@ export function mergeFromServer(data, force = false) {
 
   setState({
     connected: true,
-    poweredOff: false,
     failures: 0,
     device: data.device || state.device,
     title,

@@ -112,7 +112,7 @@ export function createKnob(root) {
   let lastPointerAngle = null;
 
   function canAdjustVolume() {
-    return state.connected && !state.poweredOff && !state.muted;
+    return state.connected && !state.muted;
   }
 
   function onPointerDown(e) {
@@ -171,7 +171,7 @@ export function createKnob(root) {
   async function onMute(e) {
     e.preventDefault();
     e.stopPropagation();
-    if (!state.ip || state.poweredOff || state.togglingMute) return;
+    if (!state.ip || state.togglingMute) return;
 
     haptic();
     setState({ togglingMute: true });
@@ -189,7 +189,7 @@ export function createKnob(root) {
   muteBtn.addEventListener('click', (e) => e.preventDefault());
 
   function syncFromState() {
-    const unavailable = !state.connected || state.poweredOff;
+    const unavailable = !state.connected;
     dial.classList.toggle('disabled', unavailable);
     dial.classList.toggle('is-muted', state.muted);
     muteBtn.classList.toggle('is-muted', state.muted);
