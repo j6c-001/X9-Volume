@@ -148,11 +148,19 @@ body {
   opacity: 0.4;
 }
 
-.knob-stack.is-muted .knob-fill,
-.knob-stack.is-muted .knob-handle,
+.knob-stack.is-muted .knob-fill {
+  stroke: #555;
+  filter: none;
+}
+
+.knob-stack.is-muted .knob-handle {
+  fill: #555;
+  stroke: #555;
+  filter: none;
+}
+
 .knob-stack.is-muted .knob-indicator {
   stroke: #555;
-  fill: #555;
   filter: none;
 }
 
