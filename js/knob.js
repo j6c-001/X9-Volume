@@ -190,18 +190,18 @@ export function createKnob(root) {
       headroom.style.filter = 'none';
     }
 
+    // Keep the used fill (−100 dB → position) on the accent; warn via headroom + knob.
+    fill.style.stroke = '';
+    fill.style.filter = '';
+
     if (!muted && heat > 0.02) {
       const stroke = warnColor(heat, 1);
       const glow = warnColor(heat, 0.22 + heat * 0.45);
-      fill.style.stroke = stroke;
-      fill.style.filter = `drop-shadow(0 0 ${8 + heat * 10}px ${glow})`;
       handle.style.fill = stroke;
       handle.style.stroke = 'var(--bg)';
-      handle.style.filter = `drop-shadow(0 0 ${4 + heat * 10}px ${glow})`;
+      handle.style.filter = `drop-shadow(0 0 ${4 + heat * 12}px ${glow})`;
       stack.style.setProperty('--knob-warn', stroke);
     } else {
-      fill.style.stroke = '';
-      fill.style.filter = '';
       handle.style.fill = '';
       handle.style.stroke = '';
       handle.style.filter = '';

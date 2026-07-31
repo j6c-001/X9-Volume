@@ -729,10 +729,6 @@ body {
   filter: drop-shadow(0 0 6px var(--knob-warn, var(--accent-dim)));
 }
 
-.knob-stack.is-warning .knob-readout {
-  color: var(--knob-warn, var(--text));
-}
-
 .knob-stack.is-muted .knob-body {
   opacity: 0.4;
 }
@@ -774,7 +770,6 @@ body {
   stroke-width: 22;
   stroke-linecap: round;
   filter: drop-shadow(0 0 10px var(--accent-dim));
-  transition: stroke 80ms linear;
 }
 
 .knob-body {
