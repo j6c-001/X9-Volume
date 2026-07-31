@@ -53,6 +53,3 @@ export function mergeFromServer(data, force = false) {
   });
 }
 
-export function haptic() {
-  if (navigator.vibrate) navigator.vibrate(10);
-}

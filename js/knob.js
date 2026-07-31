@@ -1,6 +1,15 @@
 import { toDb, toVolume, setVolume, toggleMute } from './api.js';
-import { state, setState, haptic } from './state.js';
+import { state, setState } from './state.js';
 import { forceSync } from './poller.js';
+import {
+  armHaptics,
+  hapticTick,
+  hapticMajor,
+  hapticEndstop,
+  hapticGrab,
+  hapticRelease,
+  hapticImpact,
+} from './haptics.js';
 
 const MIN_DB = -100;
 const MAX_DB = 0;
@@ -109,7 +118,8 @@ export function createKnob(root) {
   let throttleTimer = null;
   let localDb = toDb(state.volume);
   let lastSentStep = null;
-  let lastHapticAt = 0;
+  let endstopLatched = false;
+  let didDrag = false;
 
   function render(db) {
     const angle = dbToAngle(db);
@@ -129,17 +139,38 @@ export function createKnob(root) {
     setVolume(state.ip, v).catch(() => {});
   }
 
+  function feedbackForStep(prevVolume, nextVolume) {
+    const minVol = toVolume(MIN_DB, state.soundStep);
+    const maxVol = toVolume(MAX_DB, state.soundStep);
+    const atEnd = nextVolume <= minVol || nextVolume >= maxVol;
+
+    if (atEnd) {
+      if (!endstopLatched) {
+        endstopLatched = true;
+        hapticEndstop();
+      }
+      return;
+    }
+
+    endstopLatched = false;
+    const prevDb = toDb(prevVolume);
+    const nextDb = toDb(nextVolume);
+    // Stronger detent every 5 dB
+    if (Math.floor(prevDb / 5) !== Math.floor(nextDb / 5)) {
+      hapticMajor();
+    } else {
+      hapticTick();
+    }
+  }
+
   function scheduleVolume(db) {
     if (state.muted) return;
     const volume = toVolume(db, state.soundStep);
     pendingVolume = volume;
     if (lastSentStep !== volume) {
+      const prev = lastSentStep ?? volume;
       lastSentStep = volume;
-      const now = performance.now();
-      if (now - lastHapticAt > 50) {
-        lastHapticAt = now;
-        haptic();
-      }
+      feedbackForStep(prev, volume);
     }
     if (throttleTimer) return;
     throttleTimer = setTimeout(() => {
@@ -186,13 +217,18 @@ export function createKnob(root) {
     if (!isOnKnob(rNorm)) return;
 
     e.preventDefault();
+    armHaptics();
     pointerDown = true;
     dragActive = true;
+    didDrag = false;
     activePointerId = e.pointerId;
     lastPointerAngle = angle;
     lastSentStep = toVolume(localDb, state.soundStep);
+    endstopLatched = lastSentStep <= toVolume(MIN_DB, state.soundStep)
+      || lastSentStep >= toVolume(MAX_DB, state.soundStep);
     stack.classList.add('is-dragging');
     setState({ dragging: true });
+    hapticGrab();
     try { stack.setPointerCapture(e.pointerId); } catch (_) {}
   }
 
@@ -209,6 +245,7 @@ export function createKnob(root) {
     delta = Math.max(-24, Math.min(24, delta));
 
     const dbDelta = (delta / GEAR_DEG) * (MAX_DB - MIN_DB);
+    if (Math.abs(dbDelta) > 0.001) didDrag = true;
     applyDb(localDb + dbDelta);
     lastPointerAngle = angle;
   }
@@ -227,9 +264,11 @@ export function createKnob(root) {
       setState({ volume, dragging: false });
       pendingVolume = volume;
       flushVolume();
+      if (didDrag) hapticRelease();
     }
 
     dragActive = false;
+    didDrag = false;
     lastPointerAngle = null;
     activePointerId = null;
     try { stack.releasePointerCapture(e.pointerId); } catch (_) {}
@@ -246,7 +285,8 @@ export function createKnob(root) {
     e.stopPropagation();
     if (!state.ip || state.togglingMute) return;
 
-    haptic();
+    armHaptics();
+    hapticImpact();
     setState({ togglingMute: true });
     try {
       await toggleMute(state.ip);
