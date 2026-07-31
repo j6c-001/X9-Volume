@@ -54,17 +54,8 @@ body {
   margin-bottom: 8px;
 }
 
-.header-main {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 12px;
-  min-width: 0;
-}
-
 .header-text {
   min-width: 0;
-  flex: 1;
 }
 
 .header-title {
@@ -100,56 +91,6 @@ body {
 
 .status-dot.offline {
   background: var(--danger);
-}
-
-.power-toggle {
-  display: grid;
-  grid-template-columns: 1fr auto 1fr;
-  align-items: center;
-  gap: 4px;
-  padding: 4px;
-  border: 1px solid #2a2a35;
-  border-radius: 999px;
-  background: var(--surface);
-  color: var(--muted);
-  cursor: pointer;
-  flex-shrink: 0;
-  min-width: 88px;
-  height: 36px;
-  position: relative;
-  -webkit-tap-highlight-color: transparent;
-}
-
-.power-label {
-  font-size: 0.625rem;
-  font-weight: 700;
-  letter-spacing: 0.06em;
-  z-index: 1;
-  pointer-events: none;
-}
-
-.power-knob {
-  position: absolute;
-  top: 3px;
-  left: 3px;
-  width: calc(50% - 3px);
-  height: calc(100% - 6px);
-  border-radius: 999px;
-  background: #3a3a45;
-  transition: transform 0.18s ease, background 0.18s ease;
-}
-
-.power-toggle.is-on .power-knob {
-  transform: translateX(100%);
-  background: var(--accent);
-}
-
-.power-toggle.is-on .power-label:last-child {
-  color: var(--bg);
-}
-
-.power-toggle.is-off .power-label:first-child {
-  color: var(--text);
 }
 
 .settings-btn {
