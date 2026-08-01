@@ -5,15 +5,13 @@ import { createKnob } from './knob.js';
 import { createConfigDialog } from './config.js';
 import { createIoSelector } from './io-selector.js';
 import { createVuSelector } from './vu.js';
-import { resolveSource } from './sources.js';
-import { resolveOutput } from './outputs.js';
 import { applyKnobColor, getKnobColor } from './theme.js';
 import { registerServiceWorker } from './update.js';
 
 applyKnobColor(getKnobColor());
 
 const titleEl = document.getElementById('header-title');
-const statusEl = document.getElementById('header-status');
+const firmwareEl = document.getElementById('header-firmware');
 const dotEl = document.getElementById('status-dot');
 const settingsBtn = document.getElementById('settings-btn');
 
@@ -36,18 +34,17 @@ settingsBtn.addEventListener('click', () => {
 function renderHeader() {
   titleEl.textContent = state.title || state.device || 'Luxsin-X9';
 
-  const inputLabel = resolveSource(state.input).label;
-  const outputLabel = resolveOutput(state.output).label;
-  const format = state.audioFormat ? ` · ${state.audioFormat}` : '';
   const firmwareVersion = formatFirmwareVersion(state.version);
-  const firmware = firmwareVersion ? ` · v${firmwareVersion}` : '';
-  let statusText = `${inputLabel} → ${outputLabel}${format}${firmware}`;
-
-  if (!state.connected) {
-    statusText = state.ip ? 'Unreachable' : 'No device configured';
+  let firmwareText = '';
+  if (state.connected && firmwareVersion) {
+    firmwareText = `v${firmwareVersion}`;
+  } else if (!state.connected && state.ip) {
+    firmwareText = 'Offline';
   }
 
-  statusEl.textContent = statusText;
+  firmwareEl.textContent = firmwareText;
+  firmwareEl.hidden = !firmwareText;
+  firmwareEl.classList.toggle('is-offline', !state.connected && !!state.ip);
 
   dotEl.classList.toggle('online', state.connected);
   dotEl.classList.toggle('offline', !state.connected);

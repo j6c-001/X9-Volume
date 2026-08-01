@@ -4,10 +4,10 @@ A tiny installable web app for Luxsin X9 volume control over your local network.
 
 ## Features
 
-- Device status and title at the top
+- Device name, connection, and firmware at the top
 - Configurable input sources and output routes (enable, custom label, built-in icon)
-- Main-screen **Input → Output** control — tap either side to pick from configured options
-- Flow arrow thickens and pulses with volume (quiets when muted)
+- Main-screen **Input → X9 → Output** control — tap either side to pick from configured options; stream format (PCM / Hz) under the X9 node
+- Signal through the X9 thickens and pulses with volume (quiets when muted)
 - Central volume knob (−100 dB to 0 dB line level) with stepped haptic feedback (Android Vibration API + click reinforcement; click-only where vibrate is unavailable)
 - Configurable **max volume** ceiling (default −20 dB) plus a slower “loud zone” that needs a second turn to enter
 - Mute button in the knob center
