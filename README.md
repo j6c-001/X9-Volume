@@ -28,7 +28,7 @@ The app is intended to be served over **HTTPS** (e.g. [GitHub Pages](https://j6c
 
 App version is in `js/version.js` (`APP_VERSION`) and shown in Settings. **Bump it on every deploy** — the service worker cache name is derived from it, so installed clients fetch a new worker, activate it (`skipWaiting` + `clients.claim`), and reload once.
 
-While the app is open it also rechecks for updates on foreground and about every 30 minutes.
+The service worker serves the app shell (HTML/JS/CSS) **network-first** (with cache fallback when offline) so normal browser tabs pick up deploys without a hard refresh. Icons/manifest stay cache-first. While the app is open it also rechecks for updates on foreground and about every 30 minutes (`updateViaCache: 'none'`).
 
 ## Install
 
