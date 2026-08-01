@@ -38,7 +38,7 @@ Use your browser’s **Add to Home Screen** / **Install app** option. The app ru
 
 Uses the [Luxsin X9 Web API](https://am.luxsinaudio.com/ota/202607/x9/121c4/X9-API-README.md):
 
-- Polls `/msgCount`, syncs via `/dev/info.cgi?action=syncData`
+- Polls `/msgCount` every ~400ms (1.5s request timeout; offline after 3 failures), syncs via `/dev/info.cgi?action=syncData`
 - Volume: `setting&volume=0..200` (mapped to −100..0 dB), snapped to the device `soundStep` (0.5 / 1 / 2 / 3 dB). Soft max and loud-zone gearing are client-side (`localStorage` key `x9-max-volume-db`)
 - Mute: `setting&isDacMetuVolume=1`
 - Input: `setting&input=0..7`
