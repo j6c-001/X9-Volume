@@ -257,12 +257,14 @@ export function createConfigDialog({
         version: data.version ?? '',
         volume: data.volume ?? 100,
         soundStep: data.soundStep ?? 0,
+        dacGain: data.dacGain != null ? Math.max(0, Math.min(3, data.dacGain | 0)) : 0,
         muted: !!data.isDacMetuVolume,
         vu: data.vu != null ? Math.max(0, data.vu | 0) : 0,
         vuCount: data.vu_count != null ? Math.max(1, data.vu_count | 0) : 16,
         vuSensor: data.vuSensor != null ? (data.vuSensor | 0) : 0,
         selectingVu: false,
         selectingIo: false,
+        selectingGain: false,
       });
       resetPoller();
       setStatus('Connected.', 'ok');

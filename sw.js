@@ -20,6 +20,7 @@ const ASSETS = [
   'js/sources.js',
   'js/outputs.js',
   'js/io-selector.js',
+  'js/gain.js',
   'js/vu.js',
   'js/haptics.js',
   'js/update.js',
