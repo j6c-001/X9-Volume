@@ -54,12 +54,19 @@ body {
 .header {
   display: grid;
   grid-template-columns: 1fr auto;
-  align-items: start;
+  align-items: center;
   gap: 12px;
   margin-bottom: 8px;
 }
 
 .header-text {
+  min-width: 0;
+}
+
+.header-identity {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
   min-width: 0;
 }
 
@@ -70,15 +77,20 @@ body {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  min-width: 0;
 }
 
-.header-status {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  margin-top: 4px;
+.header-firmware {
+  flex-shrink: 0;
   font-size: 0.8125rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
   color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.header-firmware.is-offline {
+  color: var(--danger);
 }
 
 .status-dot {
@@ -86,6 +98,7 @@ body {
   height: 7px;
   border-radius: 50%;
   flex-shrink: 0;
+  align-self: center;
   background: var(--muted);
 }
 
@@ -210,6 +223,58 @@ body {
   padding: 12px 8px;
 }
 
+.io-device {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  min-width: 64px;
+  max-width: 96px;
+  flex-shrink: 0;
+  pointer-events: none;
+  color: var(--muted);
+}
+
+.io-device-name {
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text);
+  line-height: 1;
+}
+
+.io-device-format {
+  font-size: 0.625rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  color: var(--muted);
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+  min-height: 0.9em;
+  line-height: 1.2;
+}
+
+.io-device.is-live {
+  color: var(--accent);
+}
+
+.io-device.is-live .io-device-name {
+  color: var(--accent);
+}
+
+.io-device.is-muted .io-device-name {
+  color: var(--muted);
+}
+
+.io-device.is-muted .io-device-format {
+  opacity: 0.75;
+}
+
 .io-arrow {
   --io-arrow-weight: 2px;
   --io-arrow-pulse: 0;
@@ -219,10 +284,10 @@ body {
   justify-content: center;
   gap: 2px;
   width: 40px;
-  height: 28px;
+  height: 22px;
   flex-shrink: 0;
   pointer-events: none;
-  color: var(--muted);
+  color: inherit;
 }
 
 .io-arrow-beam {

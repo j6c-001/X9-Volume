@@ -25,11 +25,15 @@ export function createIoSelector(root) {
         <span class="io-endpoint-icon" id="io-input-icon"></span>
         <span class="io-endpoint-label" id="io-input-label"></span>
       </button>
-      <div class="io-arrow" id="io-arrow" aria-hidden="true">
-        <span class="io-arrow-beam"><span class="io-arrow-wave"></span></span>
-        <svg class="io-arrow-head" viewBox="0 0 12 24" width="12" height="22" focusable="false">
-          <path d="M3 6.5 9 12 3 17.5" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>
+      <div class="io-device" id="io-device" aria-live="polite">
+        <span class="io-device-name">X9</span>
+        <div class="io-arrow" id="io-arrow" aria-hidden="true">
+          <span class="io-arrow-beam"><span class="io-arrow-wave"></span></span>
+          <svg class="io-arrow-head" viewBox="0 0 12 24" width="12" height="22" focusable="false">
+            <path d="M3 6.5 9 12 3 17.5" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <span class="io-device-format" id="io-device-format"></span>
       </div>
       <button type="button" class="io-endpoint" id="io-output" aria-haspopup="listbox" aria-expanded="false">
         <span class="io-endpoint-icon" id="io-output-icon"></span>
@@ -48,6 +52,8 @@ export function createIoSelector(root) {
   const outputIcon = root.querySelector('#io-output-icon');
   const inputLabel = root.querySelector('#io-input-label');
   const outputLabel = root.querySelector('#io-output-label');
+  const device = root.querySelector('#io-device');
+  const formatEl = root.querySelector('#io-device-format');
   const arrow = root.querySelector('#io-arrow');
   const picker = root.querySelector('#io-picker');
   const pickerStrip = root.querySelector('#io-picker-strip');
@@ -162,19 +168,30 @@ export function createIoSelector(root) {
     hapticImpact();
   }
 
-  function updateArrow() {
+  function updateDevice() {
     const muted = !!state.muted;
     const level = muted ? 0 : Math.max(0, Math.min(1, (state.volume | 0) / 200));
     // Beam 2→9px; L→R wave intensity/speed scale with level
     const weight = 2 + level * 7;
     const pulse = level;
     const duration = 1.8 - level * 1.1;
+    const live = !muted && level >= 0.02;
+    const quiet = muted || level < 0.02;
 
     arrow.style.setProperty('--io-arrow-weight', `${weight.toFixed(2)}px`);
     arrow.style.setProperty('--io-arrow-pulse', pulse.toFixed(3));
     arrow.style.setProperty('--io-arrow-duration', `${duration.toFixed(2)}s`);
-    arrow.classList.toggle('is-muted', muted || level < 0.02);
-    arrow.classList.toggle('is-live', !muted && level >= 0.02);
+    arrow.classList.toggle('is-muted', quiet);
+    arrow.classList.toggle('is-live', live);
+    device.classList.toggle('is-muted', quiet);
+    device.classList.toggle('is-live', live);
+
+    const format = String(state.audioFormat || '').trim();
+    formatEl.textContent = state.connected ? format : '';
+    formatEl.hidden = !state.connected || !format;
+
+    const formatHint = format ? `, ${format}` : '';
+    device.setAttribute('aria-label', `X9${formatHint}`);
   }
 
   function renderEndpoints() {
@@ -205,7 +222,7 @@ export function createIoSelector(root) {
 
   function render() {
     renderEndpoints();
-    updateArrow();
+    updateDevice();
     if (openSide) renderPicker(openSide);
   }
 
