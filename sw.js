@@ -46,38 +46,30 @@ self.addEventListener('activate', (e) => {
 });
 
 self.addEventListener('fetch', (e) => {
+  if (e.request.method !== 'GET') return;
+
   const url = new URL(e.request.url);
   if (url.origin !== self.location.origin) return;
 
-  // Navigations: try network first so a deploy is picked up quickly when online.
-  if (e.request.mode === 'navigate') {
-    e.respondWith(networkFirst(e.request));
+  // App shell (HTML/JS/CSS): network first so browser tabs see deploys.
+  // Icons/manifest stay cache-first; offline still falls back to precache.
+  if (e.request.mode === 'navigate' || isAppShell(url)) {
+    e.respondWith(networkFirst(e.request, { navigateFallback: e.request.mode === 'navigate' }));
     return;
   }
 
   e.respondWith(cacheFirst(e.request));
 });
 
+function isAppShell(url) {
+  const path = url.pathname;
+  return path.endsWith('.html') || path.endsWith('.js') || path.endsWith('.css');
+}
+
 async function cacheFirst(request) {
   const cached = await caches.match(request);
   if (cached) return cached;
 
-  try {
-    const res = await fetch(request);
-    if (res.ok && request.method === 'GET') {
-      const copy = res.clone();
-      caches.open(CACHE).then((c) => c.put(request, copy));
-    }
-    return res;
-  } catch (_) {
-    return new Response('Offline', {
-      status: 503,
-      headers: { 'Content-Type': 'text/plain' },
-    });
-  }
-}
-
-async function networkFirst(request) {
   try {
     const res = await fetch(request);
     if (res.ok) {
@@ -86,13 +78,34 @@ async function networkFirst(request) {
     }
     return res;
   } catch (_) {
+    return offlineResponse();
+  }
+}
+
+async function networkFirst(request, { navigateFallback = false } = {}) {
+  try {
+    // Revalidate with the network/CDN so GitHub Pages HTTP cache cannot
+    // keep serving a stale app shell while the SW thinks it "went to network".
+    const res = await fetch(request, { cache: 'no-cache' });
+    if (res.ok) {
+      const copy = res.clone();
+      caches.open(CACHE).then((c) => c.put(request, copy));
+    }
+    return res;
+  } catch (_) {
     const cached = await caches.match(request);
     if (cached) return cached;
-    const fallback = await caches.match(asset('index.html'));
-    if (fallback) return fallback;
-    return new Response('Offline', {
-      status: 503,
-      headers: { 'Content-Type': 'text/plain' },
-    });
+    if (navigateFallback) {
+      const fallback = await caches.match(asset('index.html'));
+      if (fallback) return fallback;
+    }
+    return offlineResponse();
   }
+}
+
+function offlineResponse() {
+  return new Response('Offline', {
+    status: 503,
+    headers: { 'Content-Type': 'text/plain' },
+  });
 }

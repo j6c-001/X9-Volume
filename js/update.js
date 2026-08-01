@@ -11,7 +11,12 @@ export async function registerServiceWorker() {
 
   const hadController = !!navigator.serviceWorker.controller;
   const swUrl = new URL('../sw.js', import.meta.url);
-  const reg = await navigator.serviceWorker.register(swUrl, { type: 'module' });
+  // Bypass HTTP cache when checking sw.js / its imports so deploys are seen
+  // promptly in both the installed app and normal browser tabs.
+  const reg = await navigator.serviceWorker.register(swUrl, {
+    type: 'module',
+    updateViaCache: 'none',
+  });
 
   const checkForUpdate = () => {
     reg.update().catch(() => {});
