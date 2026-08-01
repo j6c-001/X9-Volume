@@ -4,6 +4,7 @@ import { startPoller } from './poller.js';
 import { createKnob } from './knob.js';
 import { createConfigDialog } from './config.js';
 import { createIoSelector } from './io-selector.js';
+import { createGainControl } from './gain.js';
 import { createVuSelector } from './vu.js';
 import { applyKnobColor, getKnobColor } from './theme.js';
 import { registerServiceWorker } from './update.js';
@@ -16,6 +17,7 @@ const dotEl = document.getElementById('status-dot');
 const settingsBtn = document.getElementById('settings-btn');
 
 const io = createIoSelector(document.getElementById('io-root'));
+const gain = createGainControl(document.getElementById('gain-root'));
 const vu = createVuSelector(document.getElementById('vu-root'));
 const knob = createKnob(document.getElementById('knob-root'));
 const config = createConfigDialog({
@@ -53,6 +55,7 @@ function renderHeader() {
 subscribe(() => {
   renderHeader();
   io.render();
+  gain.render();
   vu.render();
   knob.syncFromState();
 });
@@ -67,4 +70,5 @@ if (!state.ip) {
 
 renderHeader();
 io.render();
+gain.render();
 vu.render();

@@ -9,6 +9,12 @@ export const OUTPUT_LABELS = [
   'XLR', 'RCA', 'Headphone', 'XLR + RCA',
 ];
 
+/** Device output index for the headphone jack. */
+export const OUTPUT_HEADPHONE = 2;
+
+/** Official UI exposes three headphone gain steps (API allows 0..3). */
+export const GAIN_LABELS = ['Low', 'Medium', 'High'];
+
 // Device soundStep 0..3 → 0.5, 1, 2, 3 dB per relay step (API volume units are 0.5 dB)
 export const VOLUME_STEP_UNITS = [1, 2, 4, 6];
 
@@ -99,6 +105,12 @@ export async function setInput(ip, index) {
 export async function setOutput(ip, index) {
   const n = Math.max(0, Math.min(3, index | 0));
   const res = await deviceFetch(ip, `/dev/info.cgi?action=setting&output=${n}`);
+  return res.ok;
+}
+
+export async function setDacGain(ip, index) {
+  const n = Math.max(0, Math.min(GAIN_LABELS.length - 1, index | 0));
+  const res = await deviceFetch(ip, `/dev/info.cgi?action=setting&dacGain=${n}`);
   return res.ok;
 }
 

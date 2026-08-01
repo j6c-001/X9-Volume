@@ -11,6 +11,7 @@ A tiny installable web app for Luxsin X9 volume control over your local network.
 - Central volume knob (−100 dB to 0 dB line level) with stepped haptic feedback (Android Vibration API + click reinforcement; click-only where vibrate is unavailable)
 - Configurable **max volume** ceiling (default −20 dB) plus a slower “loud zone” that needs a second turn to enter
 - Mute button in the knob center
+- Headphone **gain** (Low / Medium / High) when output is Headphone
 - Tabbed settings (Device / Appearance / Sources / Outputs) with auto-save and close (X)
 - Offline-capable PWA shell (LAN required for device control)
 
@@ -43,6 +44,7 @@ Uses the [Luxsin X9 Web API](https://am.luxsinaudio.com/ota/202607/x9/121c4/X9-A
 - Mute: `setting&isDacMetuVolume=1`
 - Input: `setting&input=0..7`
 - Output: `setting&output=0..3` (XLR / RCA / Headphone / XLR + RCA)
+- Headphone gain: `setting&dacGain=0..2` (Low / Medium / High), shown only when output is Headphone
 
 Stock input labels match the official Luxsin X9 UI (`RCA`, `HDMI-EARC`, `USB Driver`, etc.). In Settings you can hide unused inputs/outputs and override labels/icons. Sources use device/connection icons (TV, streamer, turntable, DAC, USB, …); outputs use a separate set (headphones, earbuds, IEMs, amp, speakers, …), stored in `localStorage` as `x9-sources` / `x9-outputs`. Enable **Icon only on main screen** (`x9-source-icon-only`) to hide endpoint labels and show icons alone.
 

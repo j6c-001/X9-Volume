@@ -11,11 +11,13 @@ export const state = {
   version: '',
   volume: 100,
   soundStep: 0,
+  dacGain: 0,
   muted: false,
   dragging: false,
   togglingMute: false,
   selectingVu: false,
   selectingIo: false,
+  selectingGain: false,
   vu: 0,
   vuCount: 16,
   vuSensor: 0,
@@ -61,6 +63,10 @@ export function mergeFromServer(data, force = false) {
   if (!state.selectingIo) {
     if (data.input != null) next.input = data.input;
     if (data.output != null) next.output = Math.max(0, Math.min(3, data.output | 0));
+  }
+
+  if (!state.selectingGain && data.dacGain != null) {
+    next.dacGain = Math.max(0, Math.min(3, data.dacGain | 0));
   }
 
   if (!state.selectingVu) {
